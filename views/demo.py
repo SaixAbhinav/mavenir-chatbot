@@ -53,7 +53,7 @@ with st.container(key="topbar"):
     left, right = st.columns([3, 1], vertical_alignment="center")
     left.markdown(
         f'<div class="brand"><span class="brand__mark">{MARK}</span>'
-        f'<span class="brand__name">3GPP NOC Copilot</span></div>',
+        f'<span class="brand__name">3GPP NOC Chatbot</span></div>',
         unsafe_allow_html=True,
     )
     right.page_link(docs_page, label="Learn more  →")

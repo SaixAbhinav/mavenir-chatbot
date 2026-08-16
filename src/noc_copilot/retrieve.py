@@ -104,7 +104,7 @@ class Retriever:
 
         # One specification can otherwise fill the whole context — TS 28.552
         # alone is 733 near-identically worded measurement clauses — which is
-        # what makes cross-specification questions fail (findings §4.20).
+        # what makes cross-specification questions fail.
         cap = per_spec_cap if per_spec_cap is not None else len(self.ids)
         best: list[str] = []
         taken: dict[str, int] = defaultdict(int)

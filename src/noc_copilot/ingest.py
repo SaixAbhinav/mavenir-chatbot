@@ -19,7 +19,7 @@ RAW, NORMALISED, INDEX = REPO / "data" / "raw", REPO / "data" / "normalised", RE
 def drop_excluded(clauses: list[Clause], exclude: list[str]) -> list[Clause]:
     """Remove Clauses inside an excluded branch of the document.
 
-    Scope is configuration, never the parser (ADR 0005). Matching is on whole
+    Scope is configuration, never the parser. Matching is on whole
     clause-id parts, so excluding "6" drops 6 and 6.3.2 but leaves 60.1 alone.
     """
     if not exclude:
@@ -62,7 +62,7 @@ def main() -> None:
               f"-> {len(chunks)} chunks")
 
     # The Change history annexes are editorial metadata, not specification text.
-    # Assert rather than trust the exclusion lists (ADR 0006).
+    # Assert rather than trust the exclusion lists.
     leaked = [c.chunk_id for c in all_chunks if "change history" in c.clause_title.lower()]
     if leaked:
         raise SystemExit(f"Change history reached the corpus: {leaked}")
