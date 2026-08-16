@@ -1,6 +1,8 @@
 """Ingest: download -> normalise -> parse -> chunk -> index.
 
-Runs locally only. The resulting index is committed so the app starts instantly.
+Runs locally only. The built index (data/index/) is git-ignored — it holds
+copyrighted 3GPP clause text — and is regenerated from these downloads, then
+baked into the Docker image at build time so the app starts without re-ingesting.
 """
 from __future__ import annotations
 
