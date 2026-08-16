@@ -10,6 +10,41 @@ only from the standards, with the clause shown as evidence.
 
 ---
 
+## Demo
+
+The two behaviours that matter, taken verbatim from the evaluation set.
+
+**A grounded answer, with its clause as the evidence:**
+
+> **Q —** In the default MAC cell group configuration, what value is
+> `periodicBSR-Timer` set to?
+>
+> **A —** In the default MAC Cell Group configuration, the `periodicBSR-Timer`
+> is set to the value `sf10`.
+>
+> &nbsp;&nbsp;📎 &nbsp;**TS 38.331** · RRC · Release 17 · clause **9.2.2**
+
+**A refusal instead of a guess** — a plausible operations question the standards
+cannot answer, because it is about a live network rather than the specification:
+
+> **Q —** Handsets on one cell keep dropping back to idle a few seconds after the
+> radio gets bad. Which timer and counter chain produces that behaviour?
+>
+> **⊘ Declined — not answerable from the standards.** This asks about a live
+> network. I am grounded only in 3GPP specifications and have no access to
+> telemetry.
+
+Run it yourself with the two commands in [Running it locally](#running-it-locally).
+
+<!-- Screenshots / screen recording of the running app go here. Capture the two
+     interactions above from the local Streamlit UI and save them into assets/,
+     then uncomment:
+![Grounded answer with citation](assets/demo-answer.png)
+![Refusal of an out-of-scope question](assets/demo-refusal.png)
+-->
+
+---
+
 ## Why this exists
 
 A general chatbot will confidently answer a 3GPP question whether or not it
