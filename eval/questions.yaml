@@ -1,0 +1,334 @@
+# Evaluation set for the 3GPP NOC Copilot.
+#
+# FROZEN 2026-08-14, BEFORE any retrieval tuning. Verify via git history: this
+# file's first commit precedes every commit touching retrieve.py or the
+# thresholds in config/settings.yaml.
+#
+# How these were authored (design spec §4.7, findings §1.5):
+#   - Every question was written first, from what a NOC engineer asks, then the
+#     answering clause was located by reading the pinned specification.
+#   - Gold clause ids were read from the document. None came from system output,
+#     and no retrieval query was run while authoring.
+#   - No question was generated from chunk text: questions written from chunks
+#     inherit their vocabulary and inflate recall toward 1.0.
+#   - Gold ids respect the corpus boundary — ASN.1 sections (ADR 0005) and the
+#     Change history annexes (ADR 0006) are excluded, so nothing cites them.
+#
+# A question may be ADDED after this commit. No question is ever REWRITTEN,
+# especially not one the system fails.
+#
+# kind:   single      answerable from one clause
+#         cross       needs clauses from two or more specifications
+#         noc         operations-facing: counters, alarms, measurements
+#         paraphrase  operator vocabulary, deliberately not the spec's wording
+# reason: no_relevant_clause | insufficient | not_answerable_from_standards
+#         (CONTEXT.md's fourth reason, `unverifiable`, is a runtime outcome and
+#          cannot be expected of a question)
+
+questions:
+
+  # ---- single: one clause, spec-adjacent wording -------------------------
+
+  - id: q001
+    kind: single
+    expect: answer
+    question: "What conditions cause the UE to initiate the RRC connection re-establishment procedure?"
+    gold: ["38.331#5.3.7.2"]
+
+  - id: q002
+    kind: single
+    expect: answer
+    question: "When does the UE start timer T310?"
+    gold: ["38.331#5.3.10.1"]
+
+  - id: q003
+    kind: single
+    expect: answer
+    question: "What does the UE do when it receives N311 consecutive in-sync indications from lower layers?"
+    gold: ["38.331#5.3.10.2"]
+
+  - id: q004
+    kind: single
+    expect: answer
+    question: "Which events cause the UE to declare radio link failure on the master cell group?"
+    gold: ["38.331#5.3.10.3"]
+
+  - id: q005
+    kind: single
+    expect: answer
+    question: "What resets the N310 counter and what happens when it reaches its maximum value?"
+    gold: ["38.331#7.2"]
+
+  - id: q006
+    kind: single
+    expect: answer
+    question: "What does the transmitting side of an AM RLC entity do when RETX_COUNT reaches maxRetxThreshold?"
+    gold: ["38.322#5.3.2"]
+
+  - id: q007
+    kind: single
+    expect: answer
+    question: "Which timers does the RLC layer use and what is each one for?"
+    gold: ["38.322#7.3"]
+
+  - id: q008
+    kind: single
+    expect: answer
+    question: "What does a receiving UM RLC entity do when t-Reassembly expires?"
+    gold: ["38.322#5.2.2.2.4"]
+
+  - id: q009
+    kind: single
+    expect: answer
+    question: "When does the transmitting PDCP entity discard a PDCP SDU?"
+    gold: ["38.323#5.3"]
+
+  - id: q010
+    kind: single
+    expect: answer
+    question: "What does the receiving PDCP entity do when t-Reordering expires?"
+    gold: ["38.323#5.2.2.2"]
+
+  - id: q011
+    kind: single
+    expect: answer
+    question: "When does the MAC entity start or restart the ra-ContentionResolutionTimer?"
+    gold: ["38.321#5.1.5"]
+
+  - id: q012
+    kind: single
+    expect: answer
+    question: "What does the MAC entity do when upper layers request a MAC reset?"
+    gold: ["38.321#5.12"]
+
+  - id: q013
+    kind: single
+    expect: answer
+    question: "Which parameters does RRC configure to control buffer status reporting?"
+    gold: ["38.321#5.4.5"]
+
+  - id: q014
+    kind: single
+    expect: answer
+    question: "How does the MAC entity detect beam failure?"
+    gold: ["38.321#5.17"]
+
+  - id: q015
+    kind: single
+    expect: answer
+    question: "Which radio resource management functions are hosted by the gNB?"
+    gold: ["38.300#4.2"]
+
+  - id: q016
+    kind: single
+    expect: answer
+    question: "What happens at the network side during an RRC re-establishment when the UE context is not locally available?"
+    gold: ["38.300#9.2.3.3"]
+
+  - id: q017
+    kind: single
+    expect: answer
+    question: "What does a PDCP entity re-establishment do to the ROHC protocol and the stored SDUs?"
+    gold: ["38.323#5.1.2"]
+
+  - id: q036
+    kind: single
+    expect: answer
+    # Authored as a refusal, then corrected: the default MAC cell group
+    # configuration table really does carry this value. See findings §4.16.
+    question: "In the default MAC cell group configuration, what value is periodicBSR-Timer set to?"
+    gold: ["38.331#9.2.2"]
+
+  # ---- cross: the answer spans two specifications ------------------------
+
+  - id: q018
+    kind: cross
+    expect: answer
+    question: "When RLC reaches the maximum number of retransmissions, what does it indicate to upper layers and what does RRC do about it?"
+    gold: ["38.322#5.3.2", "38.331#5.3.10.3"]
+
+  - id: q019
+    kind: cross
+    expect: answer
+    question: "How is a lost RLC PDU detected at the receiver, and how does PDCP handle the resulting gap in delivery?"
+    gold: ["38.322#5.2.2.2.4", "38.323#5.2.2.2"]
+
+  - id: q020
+    kind: cross
+    expect: answer
+    question: "What does MAC do when the random access preamble transmission counter is exhausted, and how does RRC treat that indication?"
+    gold: ["38.321#5.1.4", "38.331#5.3.10.3"]
+
+  - id: q021
+    kind: cross
+    expect: answer
+    question: "Which counter records RRC connection re-establishment attempts, and what makes a UE send that request in the first place?"
+    gold: ["28.552#5.1.1.17.1", "38.331#5.3.7.2"]
+
+  - id: q022
+    kind: cross
+    expect: answer
+    question: "Which measurement counts successful RRC connection establishments, and which message completes the procedure it counts?"
+    gold: ["28.552#5.1.1.15.2", "38.331#5.3.3.4"]
+
+  # ---- noc: counters, alarms, measurements -------------------------------
+
+  - id: q023
+    kind: noc
+    expect: answer
+    question: "Which measurements are defined for successful and failed RRC connection establishments?"
+    gold: ["28.552#5.1.1.15.2", "28.552#5.1.1.15.3"]
+
+  - id: q024
+    kind: noc
+    expect: answer
+    question: "What failure causes are counted separately for failed RRC connection establishments?"
+    gold: ["28.552#5.1.1.15.3"]
+
+  - id: q025
+    kind: noc
+    expect: answer
+    question: "Which events increment the counter for failed handover executions at the source gNB?"
+    gold: ["28.552#5.1.1.6.1.9"]
+
+  - id: q026
+    kind: noc
+    expect: answer
+    question: "How is downlink total PRB usage defined, and what value range does it report?"
+    gold: ["28.552#5.1.1.2.1"]
+
+  - id: q027
+    kind: noc
+    expect: answer
+    question: "How is the average PDCP re-ordering delay in the uplink measured, and in what unit is it reported?"
+    gold: ["28.552#5.1.1.1.5"]
+
+  - id: q028
+    kind: noc
+    expect: answer
+    question: "Does the fault supervision specification define how a consumer detects that alarms have been lost?"
+    gold: ["28.545#7"]
+
+  - id: q029
+    kind: noc
+    expect: answer
+    question: "How are VNF application alarms correlated with alarms related to virtualised resources?"
+    gold: ["28.545#8"]
+
+  - id: q030
+    kind: noc
+    expect: answer
+    question: "What are the steps for an authorised consumer to retrieve the alarm list of a network function instance?"
+    gold: ["28.545#5.1.16"]
+
+  # ---- paraphrase: operator vocabulary, not the specification's ----------
+
+  - id: q031
+    kind: paraphrase
+    expect: answer
+    question: "Handsets on one cell keep dropping back to idle a few seconds after the radio gets bad. Which timer and counter chain produces that behaviour?"
+    gold: ["38.331#5.3.10.1", "38.331#5.3.10.3"]
+
+  - id: q032
+    kind: paraphrase
+    expect: answer
+    question: "Why would a call ride through a brief signal dip without any signalling being exchanged?"
+    gold: ["38.331#5.3.10.2"]
+
+  - id: q033
+    kind: paraphrase
+    expect: answer
+    question: "A phone has uplink data waiting but no grant. What does it send to tell the network how much data is queued?"
+    gold: ["38.321#5.4.5"]
+
+  - id: q034
+    kind: paraphrase
+    expect: answer
+    question: "After a handover goes wrong the phone reappears on the old cell. Which counter picks that up, and how does it know?"
+    gold: ["28.552#5.1.1.6.1.9"]
+
+  - id: q035
+    kind: paraphrase
+    expect: answer
+    question: "Packets keep arriving out of order and the stack seems to sit on them for a while before passing them up. What governs that wait?"
+    gold: ["38.323#5.2.2.2"]
+
+  # ---- refusals: nothing in the corpus covers it -------------------------
+
+  - id: r001
+    expect: refuse
+    reason: no_relevant_clause
+    question: "What is the peak throughput of Wi-Fi 7?"
+
+  - id: r002
+    expect: refuse
+    reason: no_relevant_clause
+    question: "How does the AMF handle initial UE registration?"
+
+  - id: r003
+    expect: refuse
+    reason: no_relevant_clause
+    # ASN.1 information elements are excluded from the corpus (ADR 0005). This
+    # question proves the exclusion produces a refusal rather than a guess.
+    question: "What fields does the RRCReconfiguration message contain?"
+
+  - id: r004
+    expect: refuse
+    reason: no_relevant_clause
+    question: "What are the NR channel bandwidths and PRB counts defined for FR1?"
+
+  - id: r005
+    expect: refuse
+    reason: no_relevant_clause
+    question: "How is the mapping from 5QI to DSCP markings configured on the transport network?"
+
+  - id: r006
+    expect: refuse
+    reason: no_relevant_clause
+    question: "Which information elements does the F1AP UE CONTEXT SETUP REQUEST carry?"
+
+  - id: r007
+    expect: refuse
+    reason: no_relevant_clause
+    question: "What is the maximum transmit power of a class 3 NR user equipment?"
+
+  # ---- refusals: on-topic, but the corpus lacks the specific fact --------
+
+  - id: r008
+    expect: refuse
+    reason: insufficient
+    # The re-establishment procedure clauses are on-topic and will retrieve;
+    # the message definition itself is ASN.1 and excluded (ADR 0005).
+    question: "What is the ASN.1 definition of the RRCReestablishmentRequest message?"
+
+  - id: r010
+    expect: refuse
+    reason: insufficient
+    question: "How many milliseconds long is T310?"
+
+  # ---- refusals: about a live network, which no specification can answer --
+
+  - id: r011
+    expect: refuse
+    reason: not_answerable_from_standards
+    question: "Why is cell 4412 dropping calls tonight?"
+
+  - id: r012
+    expect: refuse
+    reason: not_answerable_from_standards
+    question: "Our RRC setup success rate fell to 82% this morning. What caused it?"
+
+  - id: r013
+    expect: refuse
+    reason: not_answerable_from_standards
+    question: "Which of my sites needs a PRB capacity upgrade most urgently?"
+
+  - id: r014
+    expect: refuse
+    reason: not_answerable_from_standards
+    question: "Should I raise maxRetxThreshold on this cell to stop the drops we are seeing?"
+
+  - id: r015
+    expect: refuse
+    reason: not_answerable_from_standards
+    question: "How many UEs are connected to gNB 12 right now?"

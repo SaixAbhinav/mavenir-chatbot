@@ -1,0 +1,35 @@
+# Claude / local tooling — never committed
+CLAUDE.md
+.claude/
+
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+
+# Raw spec downloads (large; ingest regenerates the index from these)
+data/raw/
+
+# Normalised (.doc -> .docx) spec conversions — copyrighted 3GPP documents
+data/normalised/
+
+# Built vector index — contains 3GPP clause text; regenerate with the ingest pipeline
+data/index/
+
+# Evaluation result payloads (contain generated answers; regenerate with evaluate.py)
+eval/results/*.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# SDD scratch workspace (ledger, briefs, review packages)
+.superpowers/

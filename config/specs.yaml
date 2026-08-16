@@ -1,0 +1,60 @@
+# Corpus definition. One Release across all seven Specifications (design spec §2.2).
+# release and each version were discovered from the live 3GPP archive by
+# scripts/discover_versions.py (Task 3) and pinned to the newest Release
+# shared by all seven Specifications.
+#
+# exclude_clauses drops a branch of a document from the indexed corpus. Every
+# entry below was chosen by measuring the parsed documents, not assumed:
+#   - ASN.1 sections, unusable as citable chunks (ADR 0005). Present in
+#     TS 38.331 only; the other six specifications contain no ASN.1 at all.
+#   - the Change history annex, editorial metadata rather than specification
+#     text, which every 3GPP document carries (ADR 0006).
+release: '17'
+specs:
+- spec_id: '38.300'
+  series: '38'
+  title: NR; NR and NG-RAN Overall description; Stage-2
+  role: CU + DU
+  version: 17.17.0
+  exclude_clauses: ["G"]            # G: Change history
+- spec_id: '38.331'
+  series: '38'
+  title: NR; Radio Resource Control (RRC); Protocol specification
+  role: CU
+  version: 17.17.0
+  exclude_clauses: ["6.2", "6.3", "6.6", "7.4", "9.3", "9.4",
+                    "11.2.1", "11.2.2", "11.3", "E"]
+  # 6.2/6.3/6.6 are the message and information-element ASN.1 (2.2M chars,
+  # 6.3.2 alone is 1.14M); 7.4 UE variables, 9.3/9.4 sidelink and 11.2/11.3
+  # inter-node are the remaining ASN.1 blocks. Prose kept: 6.1, 6.4, 6.5,
+  # 7.1 Timers, 9.1/9.2 default configurations, 11.2.3, 11.4, Annex A. E: Change history
+- spec_id: '38.323'
+  series: '38'
+  title: NR; Packet Data Convergence Protocol (PDCP) specification
+  role: CU
+  version: 17.5.0
+  exclude_clauses: ["C"]            # C: Change history
+- spec_id: '38.322'
+  series: '38'
+  title: NR; Radio Link Control (RLC) protocol specification
+  role: DU
+  version: 17.4.0
+  exclude_clauses: ["A"]            # A: Change history
+- spec_id: '38.321'
+  series: '38'
+  title: NR; Medium Access Control (MAC) protocol specification
+  role: DU
+  version: 17.15.0
+  exclude_clauses: ["A"]            # A: Change history
+- spec_id: '28.545'
+  series: '28'
+  title: Management and orchestration; Fault Supervision (FS)
+  role: Service assurance
+  version: 17.0.0
+  exclude_clauses: ["A"]            # A: Change history
+- spec_id: '28.552'
+  series: '28'
+  title: Management and orchestration; 5G performance measurements
+  role: Service assurance
+  version: 17.17.0
+  exclude_clauses: ["B"]            # B: Change history (Annex A is real content)
