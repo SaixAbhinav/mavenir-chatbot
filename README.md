@@ -199,8 +199,12 @@ xychart-beta
     bar [5, 8, 4, 0]
 ```
 
-Results are produced by `evaluate.py` and written to `eval/results/`. Reproduce
-with:
+The full published run is committed as
+[`eval/results/gemini.sanitized.json`](eval/results/gemini.sanitized.json) — the
+per-question outcomes behind the numbers above (retrieval recall, refusal reason,
+groundedness verdict, latency), with the generated answer text removed because it
+reproduces copyrighted 3GPP clause content. Results are produced by `evaluate.py`
+and written to `eval/results/`. Reproduce the full, un-sanitized run with:
 
 ```bash
 uv run python evaluate.py --provider gemini --judge
