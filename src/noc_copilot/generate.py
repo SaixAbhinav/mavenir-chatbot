@@ -19,8 +19,8 @@ __all__ = ["build_prompt", "generate", "GenerationError"]
 # Backoff before retrying the same model. Gemini returns a transient 503 under
 # load often enough to be seen in a handful of calls, and failover cannot cover
 # it: the Groq free tier caps a request at 8,000 tokens against a prompt of
-# roughly 12,200 (findings §4.25). Retrying one model also keeps a pinned-
-# provider evaluation single-model, which failover would not.
+# roughly 12,200. Retrying one model also keeps a pinned-provider evaluation
+# single-model, which failover would not.
 RETRY_DELAYS = (2.0, 5.0)
 _TRANSIENT = ("503", "429", "unavailable", "overloaded", "high demand",
               "rate limit", "timeout", "deadline")

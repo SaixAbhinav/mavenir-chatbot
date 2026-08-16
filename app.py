@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-st.set_page_config(page_title="3GPP NOC Copilot", page_icon="📡", layout="centered")
+st.set_page_config(page_title="3GPP NOC Chatbot", page_icon="📡", layout="centered")
 
 st.markdown(
     """

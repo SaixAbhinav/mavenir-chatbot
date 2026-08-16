@@ -55,8 +55,8 @@ class Pipeline:
                allow_failover: bool = True) -> Result:
         started = time.monotonic()
         # The shaping settings must be passed explicitly — Retriever.search does
-        # not read settings.yaml, and its bare defaults undo the recall work of
-        # Task 9 (findings §4.21).
+        # not read settings.yaml, and its bare defaults undo the retrieval
+        # shaping that the tuned settings provide.
         hits = self.retriever.search(
             question,
             top_k=self.settings.top_k,

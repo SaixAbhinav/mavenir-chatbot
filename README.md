@@ -1,4 +1,4 @@
-# 3GPP NOC Copilot
+# 3GPP NOC Chatbot
 
 A question-answering assistant over a fixed corpus of 3GPP 5G specifications.
 It answers with an **exact clause citation**, or it **explicitly declines** —
@@ -84,7 +84,7 @@ per chunk).
 
 ASN.1 information-element sections are excluded from the corpus (they are
 enormous, near-duplicate, and defeat one-chunk-one-identity); annex clauses are
-included. See `docs/adr/` for these decisions.
+included.
 
 ---
 
@@ -109,8 +109,22 @@ circular result:
 **30/36 (83%)** — single-clause 18/18, cross-specification 3/5 — at ~11 chunks of
 context.
 
-**Generation** results are produced by `evaluate.py` and written to
-`eval/results/`. Reproduce with:
+**Generation** (all 50 questions, `gemini-3.7-flash`, groundedness judged by
+`openai/gpt-oss-120b`):
+
+| Metric | Result |
+|--------|--------|
+| Groundedness — judged answers supported by their cited clauses | **33 / 33 (1.00)** |
+| Out-of-scope refusal — out-of-scope questions correctly declined | **14 / 14 (1.00)** |
+| Full-gold retrieval recall | **30 / 36 (0.83)** |
+| False-refusal rate — answerable questions wrongly declined | **3 / 36 (0.08)** |
+
+Every answer the system produced was grounded in the clauses it cited, and every
+out-of-scope question was refused. The three false refusals are the safe error
+direction: the system withholds rather than risk an unsupported answer.
+
+Results are produced by `evaluate.py` and written to `eval/results/`. Reproduce
+with:
 
 ```bash
 uv run python evaluate.py --provider gemini --judge
@@ -171,7 +185,6 @@ app.py             Streamlit router
 views/             demo and documentation pages
 eval/              frozen question set + results
 config/            specs and settings
-docs/adr/          architecture decision records
 evaluate.py        evaluation harness
 ```
 

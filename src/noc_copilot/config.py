@@ -14,8 +14,7 @@ class SpecEntry(BaseModel):
     role: str
     version: str | None = None
     # Branches of the document kept out of the indexed corpus: ASN.1 sections
-    # (ADR 0005) and the Change history annex (ADR 0006). Applied at ingest,
-    # never by the parser.
+    # and the Change history annex. Applied at ingest, never by the parser.
     exclude_clauses: list[str] = []
 
 
@@ -30,7 +29,7 @@ class Settings(BaseModel):
     groq_model: str | None = None
     top_k: int
     max_chunk_chars: int
-    # Retrieval shaping, measured in findings §4.20. per_spec_cap keeps one
+    # Retrieval shaping, tuned on the evaluation set. per_spec_cap keeps one
     # specification from filling the whole context; sibling expansion completes
     # a procedure that leaf-clause chunking split across sibling clauses.
     per_spec_cap: int = 4

@@ -25,7 +25,7 @@ def normalise_quote(text: str) -> str:
 
     Tolerating whitespace costs nothing in strictness — a model that reformats a
     tab is not inventing a claim — and the real fabrication this gate exists to
-    catch (findings §4.23) fails the comparison either way.
+    catch fails the comparison either way.
     """
     return _WHITESPACE.sub(" ", text).strip().lower()
 
@@ -39,14 +39,14 @@ def gate_relevance(hits, settings: Settings) -> str | None:
 
     Note this gate cannot carry the out-of-scope refusal rate on its own: the
     raw cosine of an answerable question and of an in-domain but out-of-corpus
-    one overlap almost completely (findings §4.18). It is a coarse filter; Gates
-    2 and 3 do the discriminating work.
+    one overlap almost completely. It is a coarse filter; Gates 2 and 3 do the
+    discriminating work.
     """
     ranked = [h for h in hits if not h.expanded]
     if not ranked:
         return NO_RELEVANT_CLAUSE
     if settings.cosine_threshold is None or settings.bm25_threshold is None:
-        return None  # uncalibrated: gate is inactive until Task 16
+        return None  # uncalibrated: gate is inactive until thresholds are set
     best_cosine = max(h.cosine for h in ranked)
     best_bm25 = max(h.bm25 for h in ranked)
     # Either signal alone is enough: BM25 carries exact identifiers that dense
