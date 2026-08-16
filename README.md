@@ -118,6 +118,34 @@ flowchart LR
 
 ---
 
+## Preventing hallucination
+
+The single design goal is to make a confident, wrong answer about a standard
+structurally hard to produce, not merely unlikely. A hallucinated 3GPP answer is
+worse than no answer, so every plausible failure mode is closed by a specific
+mechanism rather than by trusting the model to behave:
+
+| How a hallucination would arise | What blocks it |
+|---------------------------------|----------------|
+| The model answers from its own training knowledge of 3GPP | The prompt supplies only the retrieved clauses and forbids outside knowledge; generation runs at temperature 0. |
+| The model answers when nothing on-topic was retrieved | **Gate 1** refuses on the raw retrieval scores, *before any model call is made*. |
+| The model pads a thin or off-target context into a confident answer | **Gate 2** requires the model to declare the retrieved context sufficient, and to flag live-network questions the standards cannot answer. |
+| The model invents a clause id, or paraphrases / fabricates a quote | **Gate 3** checks, in code, that every supporting quote appears **verbatim** in the clause it cites. A fabricated or altered citation is rejected and withheld, not shown. |
+| A quote that is real but does not actually support the answer slips through | Offline evaluation judges groundedness with a **different model** than the one that generated the answer, so the check is independent of the thing it grades. |
+
+The three gates are deterministic and sit **outside** the language model, so none
+of them can be talked out of a refusal. When grounding cannot be established the
+system declines, and says which of four reasons applies — a refusal is the
+designed response, never a broken answer path.
+
+The outcome is measured, not asserted. On the frozen evaluation set every answer
+the system produced was grounded in the clause it cited (**33/33**), and every
+out-of-scope question was declined (**14/14**). See
+[Evaluation](#evaluation) for the full scorecard and the committed per-question
+results.
+
+---
+
 ## The corpus
 
 Seven specifications, all pinned to **Release 17** so a cross-specification
