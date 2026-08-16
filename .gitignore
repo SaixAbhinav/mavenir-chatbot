@@ -24,6 +24,8 @@ data/index/
 
 # Evaluation result payloads (contain generated answers; regenerate with evaluate.py)
 eval/results/*.json
+# ...except the sanitized run, committed as inspectable evidence (answer prose stripped)
+!eval/results/gemini.sanitized.json
 
 # OS / editor
 .DS_Store

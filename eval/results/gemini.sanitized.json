@@ -1,0 +1,751 @@
+{
+  "_note": "Sanitized eval results, committed as inspectable evidence. Per-question outcomes are preserved (retrieval recall, refusal reason, groundedness verdict, latency); the generated 'answer' text is removed because it reproduces copyrighted 3GPP clause content (see NOTICE.md). Regenerate the full, un-sanitized run locally with: uv run python evaluate.py --provider gemini --judge",
+  "provider": "gemini",
+  "model_id": "gemini-3.7-flash",
+  "judge_model": "openai/gpt-oss-120b",
+  "complete": true,
+  "n_answered": 50,
+  "summary": {
+    "n_answerable": 36,
+    "n_refusable": 14,
+    "recall_at_k": 0.833,
+    "false_refusal_rate": 0.083,
+    "refusal_rate_out_of_scope": 1.0,
+    "groundedness": 1.0
+  },
+  "refusals_by_gate": {
+    "sufficiency": 12,
+    "relevance": 5
+  },
+  "records": [
+    {
+      "id": "q001",
+      "kind": "single",
+      "expect": "answer",
+      "question": "What conditions cause the UE to initiate the RRC connection re-establishment procedure?",
+      "gold": [
+        "38.331#5.3.7.2"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 21734
+    },
+    {
+      "id": "q002",
+      "kind": "single",
+      "expect": "answer",
+      "question": "When does the UE start timer T310?",
+      "gold": [
+        "38.331#5.3.10.1"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 240218
+    },
+    {
+      "id": "q003",
+      "kind": "single",
+      "expect": "answer",
+      "question": "What does the UE do when it receives N311 consecutive in-sync indications from lower layers?",
+      "gold": [
+        "38.331#5.3.10.2"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 2781
+    },
+    {
+      "id": "q004",
+      "kind": "single",
+      "expect": "answer",
+      "question": "Which events cause the UE to declare radio link failure on the master cell group?",
+      "gold": [
+        "38.331#5.3.10.3"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 3469
+    },
+    {
+      "id": "q005",
+      "kind": "single",
+      "expect": "answer",
+      "question": "What resets the N310 counter and what happens when it reaches its maximum value?",
+      "gold": [
+        "38.331#7.2"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 3640
+    },
+    {
+      "id": "q006",
+      "kind": "single",
+      "expect": "answer",
+      "question": "What does the transmitting side of an AM RLC entity do when RETX_COUNT reaches maxRetxThreshold?",
+      "gold": [
+        "38.322#5.3.2"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 35921
+    },
+    {
+      "id": "q007",
+      "kind": "single",
+      "expect": "answer",
+      "question": "Which timers does the RLC layer use and what is each one for?",
+      "gold": [
+        "38.322#7.3"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 6750
+    },
+    {
+      "id": "q008",
+      "kind": "single",
+      "expect": "answer",
+      "question": "What does a receiving UM RLC entity do when t-Reassembly expires?",
+      "gold": [
+        "38.322#5.2.2.2.4"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 5500
+    },
+    {
+      "id": "q009",
+      "kind": "single",
+      "expect": "answer",
+      "question": "When does the transmitting PDCP entity discard a PDCP SDU?",
+      "gold": [
+        "38.323#5.3"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 16641
+    },
+    {
+      "id": "q010",
+      "kind": "single",
+      "expect": "answer",
+      "question": "What does the receiving PDCP entity do when t-Reordering expires?",
+      "gold": [
+        "38.323#5.2.2.2"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 16921
+    },
+    {
+      "id": "q011",
+      "kind": "single",
+      "expect": "answer",
+      "question": "When does the MAC entity start or restart the ra-ContentionResolutionTimer?",
+      "gold": [
+        "38.321#5.1.5"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 10312
+    },
+    {
+      "id": "q012",
+      "kind": "single",
+      "expect": "answer",
+      "question": "What does the MAC entity do when upper layers request a MAC reset?",
+      "gold": [
+        "38.321#5.12"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 36750
+    },
+    {
+      "id": "q013",
+      "kind": "single",
+      "expect": "answer",
+      "question": "Which parameters does RRC configure to control buffer status reporting?",
+      "gold": [
+        "38.321#5.4.5"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 4344
+    },
+    {
+      "id": "q014",
+      "kind": "single",
+      "expect": "answer",
+      "question": "How does the MAC entity detect beam failure?",
+      "gold": [
+        "38.321#5.17"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 13266
+    },
+    {
+      "id": "q015",
+      "kind": "single",
+      "expect": "answer",
+      "question": "Which radio resource management functions are hosted by the gNB?",
+      "gold": [
+        "38.300#4.2"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 24233
+    },
+    {
+      "id": "q016",
+      "kind": "single",
+      "expect": "answer",
+      "question": "What happens at the network side during an RRC re-establishment when the UE context is not locally available?",
+      "gold": [
+        "38.300#9.2.3.3"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 8671
+    },
+    {
+      "id": "q017",
+      "kind": "single",
+      "expect": "answer",
+      "question": "What does a PDCP entity re-establishment do to the ROHC protocol and the stored SDUs?",
+      "gold": [
+        "38.323#5.1.2"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 19266
+    },
+    {
+      "id": "q036",
+      "kind": "single",
+      "expect": "answer",
+      "question": "In the default MAC cell group configuration, what value is periodicBSR-Timer set to?",
+      "gold": [
+        "38.331#9.2.2"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 2046
+    },
+    {
+      "id": "q018",
+      "kind": "cross",
+      "expect": "answer",
+      "question": "When RLC reaches the maximum number of retransmissions, what does it indicate to upper layers and what does RRC do about it?",
+      "gold": [
+        "38.322#5.3.2",
+        "38.331#5.3.10.3"
+      ],
+      "retrieved_gold": false,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 4483
+    },
+    {
+      "id": "q019",
+      "kind": "cross",
+      "expect": "answer",
+      "question": "How is a lost RLC PDU detected at the receiver, and how does PDCP handle the resulting gap in delivery?",
+      "gold": [
+        "38.322#5.2.2.2.4",
+        "38.323#5.2.2.2"
+      ],
+      "retrieved_gold": false,
+      "refused": true,
+      "refusal_reason": "insufficient",
+      "gate": "sufficiency",
+      "grounded": null,
+      "latency_ms": 4875
+    },
+    {
+      "id": "q020",
+      "kind": "cross",
+      "expect": "answer",
+      "question": "What does MAC do when the random access preamble transmission counter is exhausted, and how does RRC treat that indication?",
+      "gold": [
+        "38.321#5.1.4",
+        "38.331#5.3.10.3"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 5375
+    },
+    {
+      "id": "q021",
+      "kind": "cross",
+      "expect": "answer",
+      "question": "Which counter records RRC connection re-establishment attempts, and what makes a UE send that request in the first place?",
+      "gold": [
+        "28.552#5.1.1.17.1",
+        "38.331#5.3.7.2"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 9046
+    },
+    {
+      "id": "q022",
+      "kind": "cross",
+      "expect": "answer",
+      "question": "Which measurement counts successful RRC connection establishments, and which message completes the procedure it counts?",
+      "gold": [
+        "28.552#5.1.1.15.2",
+        "38.331#5.3.3.4"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 4358
+    },
+    {
+      "id": "q023",
+      "kind": "noc",
+      "expect": "answer",
+      "question": "Which measurements are defined for successful and failed RRC connection establishments?",
+      "gold": [
+        "28.552#5.1.1.15.2",
+        "28.552#5.1.1.15.3"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 8921
+    },
+    {
+      "id": "q024",
+      "kind": "noc",
+      "expect": "answer",
+      "question": "What failure causes are counted separately for failed RRC connection establishments?",
+      "gold": [
+        "28.552#5.1.1.15.3"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 4390
+    },
+    {
+      "id": "q025",
+      "kind": "noc",
+      "expect": "answer",
+      "question": "Which events increment the counter for failed handover executions at the source gNB?",
+      "gold": [
+        "28.552#5.1.1.6.1.9"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 6078
+    },
+    {
+      "id": "q026",
+      "kind": "noc",
+      "expect": "answer",
+      "question": "How is downlink total PRB usage defined, and what value range does it report?",
+      "gold": [
+        "28.552#5.1.1.2.1"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 15875
+    },
+    {
+      "id": "q027",
+      "kind": "noc",
+      "expect": "answer",
+      "question": "How is the average PDCP re-ordering delay in the uplink measured, and in what unit is it reported?",
+      "gold": [
+        "28.552#5.1.1.1.5"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 6452
+    },
+    {
+      "id": "q028",
+      "kind": "noc",
+      "expect": "answer",
+      "question": "Does the fault supervision specification define how a consumer detects that alarms have been lost?",
+      "gold": [
+        "28.545#7"
+      ],
+      "retrieved_gold": false,
+      "refused": true,
+      "refusal_reason": "insufficient",
+      "gate": "sufficiency",
+      "grounded": null,
+      "latency_ms": 4467
+    },
+    {
+      "id": "q029",
+      "kind": "noc",
+      "expect": "answer",
+      "question": "How are VNF application alarms correlated with alarms related to virtualised resources?",
+      "gold": [
+        "28.545#8"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 7655
+    },
+    {
+      "id": "q030",
+      "kind": "noc",
+      "expect": "answer",
+      "question": "What are the steps for an authorised consumer to retrieve the alarm list of a network function instance?",
+      "gold": [
+        "28.545#5.1.16"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 15078
+    },
+    {
+      "id": "q031",
+      "kind": "paraphrase",
+      "expect": "answer",
+      "question": "Handsets on one cell keep dropping back to idle a few seconds after the radio gets bad. Which timer and counter chain produces that behaviour?",
+      "gold": [
+        "38.331#5.3.10.1",
+        "38.331#5.3.10.3"
+      ],
+      "retrieved_gold": false,
+      "refused": true,
+      "refusal_reason": "not_answerable_from_standards",
+      "gate": "sufficiency",
+      "grounded": null,
+      "latency_ms": 7312
+    },
+    {
+      "id": "q032",
+      "kind": "paraphrase",
+      "expect": "answer",
+      "question": "Why would a call ride through a brief signal dip without any signalling being exchanged?",
+      "gold": [
+        "38.331#5.3.10.2"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 3984
+    },
+    {
+      "id": "q033",
+      "kind": "paraphrase",
+      "expect": "answer",
+      "question": "A phone has uplink data waiting but no grant. What does it send to tell the network how much data is queued?",
+      "gold": [
+        "38.321#5.4.5"
+      ],
+      "retrieved_gold": false,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 22016
+    },
+    {
+      "id": "q034",
+      "kind": "paraphrase",
+      "expect": "answer",
+      "question": "After a handover goes wrong the phone reappears on the old cell. Which counter picks that up, and how does it know?",
+      "gold": [
+        "28.552#5.1.1.6.1.9"
+      ],
+      "retrieved_gold": false,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 5780
+    },
+    {
+      "id": "q035",
+      "kind": "paraphrase",
+      "expect": "answer",
+      "question": "Packets keep arriving out of order and the stack seems to sit on them for a while before passing them up. What governs that wait?",
+      "gold": [
+        "38.323#5.2.2.2"
+      ],
+      "retrieved_gold": true,
+      "refused": false,
+      "refusal_reason": null,
+      "gate": null,
+      "grounded": true,
+      "latency_ms": 8671
+    },
+    {
+      "id": "r001",
+      "kind": null,
+      "expect": "refuse",
+      "question": "What is the peak throughput of Wi-Fi 7?",
+      "gold": [],
+      "retrieved_gold": null,
+      "refused": true,
+      "refusal_reason": "insufficient",
+      "gate": "sufficiency",
+      "grounded": null,
+      "latency_ms": 14703
+    },
+    {
+      "id": "r002",
+      "kind": null,
+      "expect": "refuse",
+      "question": "How does the AMF handle initial UE registration?",
+      "gold": [],
+      "retrieved_gold": null,
+      "refused": true,
+      "refusal_reason": "insufficient",
+      "gate": "sufficiency",
+      "grounded": null,
+      "latency_ms": 20219
+    },
+    {
+      "id": "r003",
+      "kind": null,
+      "expect": "refuse",
+      "question": "What fields does the RRCReconfiguration message contain?",
+      "gold": [],
+      "retrieved_gold": null,
+      "refused": true,
+      "refusal_reason": "no_relevant_clause",
+      "gate": "relevance",
+      "grounded": null,
+      "latency_ms": 30
+    },
+    {
+      "id": "r004",
+      "kind": null,
+      "expect": "refuse",
+      "question": "What are the NR channel bandwidths and PRB counts defined for FR1?",
+      "gold": [],
+      "retrieved_gold": null,
+      "refused": true,
+      "refusal_reason": "insufficient",
+      "gate": "sufficiency",
+      "grounded": null,
+      "latency_ms": 2500
+    },
+    {
+      "id": "r005",
+      "kind": null,
+      "expect": "refuse",
+      "question": "How is the mapping from 5QI to DSCP markings configured on the transport network?",
+      "gold": [],
+      "retrieved_gold": null,
+      "refused": true,
+      "refusal_reason": "insufficient",
+      "gate": "sufficiency",
+      "grounded": null,
+      "latency_ms": 12844
+    },
+    {
+      "id": "r006",
+      "kind": null,
+      "expect": "refuse",
+      "question": "Which information elements does the F1AP UE CONTEXT SETUP REQUEST carry?",
+      "gold": [],
+      "retrieved_gold": null,
+      "refused": true,
+      "refusal_reason": "no_relevant_clause",
+      "gate": "relevance",
+      "grounded": null,
+      "latency_ms": 62
+    },
+    {
+      "id": "r007",
+      "kind": null,
+      "expect": "refuse",
+      "question": "What is the maximum transmit power of a class 3 NR user equipment?",
+      "gold": [],
+      "retrieved_gold": null,
+      "refused": true,
+      "refusal_reason": "insufficient",
+      "gate": "sufficiency",
+      "grounded": null,
+      "latency_ms": 4469
+    },
+    {
+      "id": "r008",
+      "kind": null,
+      "expect": "refuse",
+      "question": "What is the ASN.1 definition of the RRCReestablishmentRequest message?",
+      "gold": [],
+      "retrieved_gold": null,
+      "refused": true,
+      "refusal_reason": "insufficient",
+      "gate": "sufficiency",
+      "grounded": null,
+      "latency_ms": 27140
+    },
+    {
+      "id": "r010",
+      "kind": null,
+      "expect": "refuse",
+      "question": "How many milliseconds long is T310?",
+      "gold": [],
+      "retrieved_gold": null,
+      "refused": true,
+      "refusal_reason": "no_relevant_clause",
+      "gate": "relevance",
+      "grounded": null,
+      "latency_ms": 62
+    },
+    {
+      "id": "r011",
+      "kind": null,
+      "expect": "refuse",
+      "question": "Why is cell 4412 dropping calls tonight?",
+      "gold": [],
+      "retrieved_gold": null,
+      "refused": true,
+      "refusal_reason": "no_relevant_clause",
+      "gate": "relevance",
+      "grounded": null,
+      "latency_ms": 109
+    },
+    {
+      "id": "r012",
+      "kind": null,
+      "expect": "refuse",
+      "question": "Our RRC setup success rate fell to 82% this morning. What caused it?",
+      "gold": [],
+      "retrieved_gold": null,
+      "refused": true,
+      "refusal_reason": "not_answerable_from_standards",
+      "gate": "sufficiency",
+      "grounded": null,
+      "latency_ms": 15937
+    },
+    {
+      "id": "r013",
+      "kind": null,
+      "expect": "refuse",
+      "question": "Which of my sites needs a PRB capacity upgrade most urgently?",
+      "gold": [],
+      "retrieved_gold": null,
+      "refused": true,
+      "refusal_reason": "not_answerable_from_standards",
+      "gate": "sufficiency",
+      "grounded": null,
+      "latency_ms": 4937
+    },
+    {
+      "id": "r014",
+      "kind": null,
+      "expect": "refuse",
+      "question": "Should I raise maxRetxThreshold on this cell to stop the drops we are seeing?",
+      "gold": [],
+      "retrieved_gold": null,
+      "refused": true,
+      "refusal_reason": "not_answerable_from_standards",
+      "gate": "sufficiency",
+      "grounded": null,
+      "latency_ms": 8014
+    },
+    {
+      "id": "r015",
+      "kind": null,
+      "expect": "refuse",
+      "question": "How many UEs are connected to gNB 12 right now?",
+      "gold": [],
+      "retrieved_gold": null,
+      "refused": true,
+      "refusal_reason": "no_relevant_clause",
+      "gate": "relevance",
+      "grounded": null,
+      "latency_ms": 93
+    }
+  ]
+}
