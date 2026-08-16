@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-uv run uvicorn noc_copilot.api:app --host 0.0.0.0 --port 8000 &
-uv run streamlit run app.py --server.port 7860 --server.address 0.0.0.0
