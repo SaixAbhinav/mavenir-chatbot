@@ -69,26 +69,23 @@ response whenever the corpus does not support a grounded reply.
 Every question runs the same pipeline. Three independent, deterministic **gates**
 sit outside the language model; any of them can turn a question into a refusal.
 
-```
-question
-   │
-   ▼
-retrieve ──►  hybrid dense + BM25, fused for ordering (RRF)
-   │
-   ▼
-Gate 1  Relevance     raw dense/BM25 scores — "nothing in the corpus is about this"
-   │                                              → refuse (no model call)
-   ▼
-generate ──►  Gemini, temperature 0, structured JSON output
-   │
-   ▼
-Gate 2  Sufficiency   model flags on-topic-but-insufficient, or live-network
-   │                                              → refuse
-   ▼
-Gate 3  Verifiability  every supporting quote must appear verbatim in its clause
-   │                                              → refuse (withheld)
-   ▼
-answer + citations
+```mermaid
+flowchart TD
+    Q(["Question"]) --> R["Retrieve — hybrid dense + BM25, fused by RRF"]
+    R --> G1{"Gate 1 · Relevance<br/>raw dense / BM25 scores"}
+    G1 -->|"nothing on-topic"| X1["Refuse · no relevant clause<br/>(no model call)"]
+    G1 -->|"relevant"| GEN["Generate — Gemini · temp 0 · structured JSON"]
+    GEN --> G2{"Gate 2 · Sufficiency"}
+    G2 -->|"on-topic but thin"| X2["Refuse · insufficient"]
+    G2 -->|"live-network question"| X3["Refuse · not answerable from standards"]
+    G2 -->|"sufficient"| G3{"Gate 3 · Verifiability<br/>quote appears verbatim?"}
+    G3 -->|"quote not found"| X4["Refuse · unverifiable"]
+    G3 -->|"verified"| A(["Answer + citations"])
+
+    classDef refuse fill:#f3ddd0,stroke:#b5651d,color:#5a2d0c;
+    classDef answer fill:#d7ecd9,stroke:#2f7d3b,color:#14401d;
+    class X1,X2,X3,X4 refuse;
+    class A answer;
 ```
 
 - **Retrieval ordering uses Reciprocal Rank Fusion; gating never does.** Fused
@@ -97,6 +94,24 @@ answer + citations
 - **The four refusal reasons are reported separately**, because they mean
   different things to the reader: *no relevant clause*, *insufficient*, *not
   answerable from the standards* (a live-network question), and *unverifiable*.
+
+### Retrieval
+
+Retrieval runs two searches and fuses them, then shapes the result so one
+specification cannot crowd out the rest and a procedure split across sibling
+clauses is kept whole.
+
+```mermaid
+flowchart LR
+    Q(["Query"]) --> D["Dense retrieval<br/>embedding cosine"]
+    Q --> B["BM25<br/>lexical overlap"]
+    D --> F["RRF fusion<br/>(ordering only)"]
+    B --> F
+    F --> C["Per-spec cap<br/>≤ N chunks / specification"]
+    C --> S["Sibling expansion<br/>completes split procedures"]
+    S --> K["Top-k context<br/>~11 chunks"]
+    K --> G(["to the gates"])
+```
 
 ---
 
@@ -157,6 +172,29 @@ context.
 Every answer the system produced was grounded in the clauses it cited, and every
 out-of-scope question was refused. The three false refusals are the safe error
 direction: the system withholds rather than risk an unsupported answer.
+
+```mermaid
+xychart-beta
+    title "Generation scorecard — 50 questions"
+    x-axis ["Groundedness", "OOS refusal", "Recall@k", "False refusal"]
+    y-axis "Ratio (0 to 1)" 0 --> 1
+    bar [1.0, 1.0, 0.83, 0.08]
+```
+
+*Higher is better for the first three; **lower** is better for false refusal.*
+
+**Refusal behaviour.** 17 of the 50 questions were declined — 14 of them
+correctly (every out-of-scope question), 3 of them false refusals of answerable
+questions. Gate 3 (verifiability) never had to fire: no generated answer reached
+the user with a quote that failed the verbatim check.
+
+```mermaid
+xychart-beta
+    title "Refusals by reason — 17 declined"
+    x-axis ["no relevant clause", "insufficient", "not answerable", "unverifiable"]
+    y-axis "Questions" 0 --> 10
+    bar [5, 8, 4, 0]
+```
 
 Results are produced by `evaluate.py` and written to `eval/results/`. Reproduce
 with:
