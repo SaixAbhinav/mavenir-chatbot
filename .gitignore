@@ -33,3 +33,6 @@ Thumbs.db
 
 # SDD scratch workspace (ledger, briefs, review packages)
 .superpowers/
+
+# Video recordings are uploaded as GitHub attachments, not committed
+*.mp4

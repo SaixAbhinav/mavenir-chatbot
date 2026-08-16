@@ -12,7 +12,7 @@ only from the standards, with the clause shown as evidence.
 
 ## Demo
 
-▶ **[Watch the demo](assets/demorecording.mp4)** — a short screen recording of the running app answering, citing, and declining. (GitHub plays it in-page; the stills below preview the two behaviours.)
+https://github.com/user-attachments/assets/d2fd9ce3-a216-48cc-a519-3c63188e6c69
 
 The two behaviours that matter, taken verbatim from the evaluation set.
 
