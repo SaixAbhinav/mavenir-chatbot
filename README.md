@@ -12,7 +12,7 @@ only from the standards, with the clause shown as evidence.
 
 ## Demo
 
-https://github.com/user-attachments/assets/REPLACE-WITH-UPLOADED-VIDEO-URL
+https://github.com/user-attachments/assets/d2fd9ce3-a216-48cc-a519-3c63188e6c69
 
 The two behaviours that matter, taken verbatim from the evaluation set.
 
