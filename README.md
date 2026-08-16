@@ -36,12 +36,13 @@ cannot answer, because it is about a live network rather than the specification:
 
 Run it yourself with the two commands in [Running it locally](#running-it-locally).
 
-<!-- Screenshots / screen recording of the running app go here. Capture the two
-     interactions above from the local Streamlit UI and save them into assets/,
-     then uncomment:
-![Grounded answer with citation](assets/demo-answer.png)
-![Refusal of an out-of-scope question](assets/demo-refusal.png)
--->
+**A grounded answer, cited to its clause:**
+
+![A grounded answer with its TS 38.331 §9.2.2 citation](assets/demo-answer.png)
+
+**A refusal instead of a guess:**
+
+![An out-of-scope question declined at the relevance gate](assets/demo-refusal.png)
 
 ---
 
