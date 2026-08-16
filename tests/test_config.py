@@ -17,11 +17,8 @@ def test_series_is_derived_consistently():
         assert spec.spec_id.startswith(spec.series)
 
 def test_versions_start_unset(tmp_path):
-    # config/specs.yaml starts with null release/versions, but Task 3 fills
-    # them in from the live archive — that's the whole point of this repo's
-    # day-1 blocker. So this test exercises load_specs' handling of unset
-    # values against a synthetic fixture instead of the (now-pinned) live
-    # config, which would otherwise make this test depend on mutable state.
+    # Exercise load_specs' handling of unset release/versions against a synthetic
+    # fixture, so the test doesn't depend on the now-pinned live config.
     unset_yaml = tmp_path / "specs.yaml"
     unset_yaml.write_text(
         "release: null\n"
@@ -41,15 +38,13 @@ def test_settings_load_from_live_config():
     settings = load_settings(REPO / "config" / "settings.yaml")
     assert settings.top_k == 8
     assert settings.embedding_model == "BAAI/bge-small-en-v1.5"
-    # Thresholds start null (Task 1) and are filled by calibration (Task 16).
-    # Once fitted they must be real floats, not left unset.
+    # Once fitted by calibration, the thresholds must be real floats, not unset.
     assert isinstance(settings.cosine_threshold, float)
     assert isinstance(settings.bm25_threshold, float)
 
 def test_settings_handle_unset_thresholds(tmp_path):
-    # Task 1 committed null thresholds; this exercises load_settings' handling
-    # of unset values against a synthetic fixture rather than the (now-fitted)
-    # live config, which would otherwise make the test depend on mutable state.
+    # Exercise load_settings' handling of unset thresholds against a synthetic
+    # fixture, so the test doesn't depend on the now-fitted live config.
     unset_yaml = tmp_path / "settings.yaml"
     unset_yaml.write_text(
         "embedding_model: 'BAAI/bge-small-en-v1.5'\n"

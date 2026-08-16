@@ -23,8 +23,6 @@ def main() -> None:
 
     observed = []
     for question in questions:
-        # Match the pipeline's retrieval exactly: pass the shaping settings, or
-        # the bare defaults undo the recall work of Task 9 (findings §4.21).
         hits = retriever.search(
             question.question,
             top_k=settings.top_k,
@@ -32,9 +30,7 @@ def main() -> None:
             sibling_expand_from=settings.sibling_expand_from,
             sibling_cap=settings.sibling_cap,
         )
-        # Gate 1 thresholds ranked Hits only. Match gate_relevance exactly: it
-        # reads `not h.expanded`, so a sibling-expanded Hit cannot rescue a
-        # retrieval that found nothing (guards.py, findings §4.18).
+
         ranked = [h for h in hits if not h.expanded]
         observed.append((
             question.expect,
@@ -53,7 +49,7 @@ def main() -> None:
             gated = [(e, c < cosine_t and b < bm25_t) for e, c, b in observed]
             caught = sum(1 for e, g in gated if e == "refuse" and g)
             wrong = sum(1 for e, g in gated if e == "answer" and g)
-            score = caught - 2 * wrong        # false refusals cost double
+            score = caught - 2 * wrong  # false refusals cost double
             if score > best_score:
                 best, best_score = (cosine_t, bm25_t), score
 

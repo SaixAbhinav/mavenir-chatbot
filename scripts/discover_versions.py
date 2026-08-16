@@ -76,8 +76,7 @@ def main() -> None:
     print(f"\nPinning Release {release}")
 
     raw = yaml.safe_load(SPECS_YAML.read_text(encoding="utf-8"))
-    # CorpusConfig.release is typed str | None (config.py, Task 1), so the
-    # release number is stored as a string to match the existing schema.
+    # CorpusConfig.release is typed str | None, so store the release as a string.
     raw["release"] = str(release)
     for entry in raw["specs"]:
         entry["version"] = newest_in_release(available[entry["spec_id"]], release)

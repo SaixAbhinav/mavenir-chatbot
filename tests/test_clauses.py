@@ -179,9 +179,8 @@ def test_bare_letter_heading_is_not_parsed_as_annex_clause(make_docx):
 
 
 def test_unnumbered_subheading_text_is_folded_into_open_clause_body(make_docx):
-    """A heading-styled paragraph that fails the clause-id pattern must not
-    be discarded while a clause is open — the parser stays a faithful reader
-    of the document (ADR 0005), so its text joins the open clause's body."""
+    """A heading-styled paragraph that fails the clause-id pattern must not be
+    discarded while a clause is open — its text joins the open clause's body."""
     path = make_docx("s.docx", [
         ("Heading 1", "5\tConnection control"),
         ("Normal", "First paragraph."),

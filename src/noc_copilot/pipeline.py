@@ -54,9 +54,7 @@ class Pipeline:
     def answer(self, question: str, provider: str = "gemini",
                allow_failover: bool = True) -> Result:
         started = time.monotonic()
-        # The shaping settings must be passed explicitly — Retriever.search does
-        # not read settings.yaml, and its bare defaults undo the retrieval
-        # shaping that the tuned settings provide.
+        # Pass the shaping settings explicitly; Retriever.search does not read them.
         hits = self.retriever.search(
             question,
             top_k=self.settings.top_k,
@@ -69,9 +67,8 @@ class Pipeline:
         if reason:
             return self._refuse(reason, "relevance", started)
 
-        # One retry, and only for a verifiability failure: re-prompting to copy
-        # quotes exactly is worth an attempt, but an insufficient or
-        # live-network verdict will not change on a second pass.
+        # One retry, only for a verifiability failure — re-prompting to copy the
+        # quote exactly. Insufficient/live-network verdicts won't change on retry.
         answer = model_id = None
         for attempt in range(2):
             suffix = RETRY_HINT if attempt else ""
@@ -97,12 +94,8 @@ class Pipeline:
                       latency_ms=int((time.monotonic() - started) * 1000))
 
     def _render_citation(self, clause_id: str, quote: str, hits) -> dict:
-        """Resolve to the Chunk the quote actually came from.
-
-        A split clause has several Chunks sharing one clause id; the demo shows
-        this text as the evidence, so it must be the right part. Gate 3 has
-        already passed, so a matching Chunk exists; fall back defensively.
-        """
+        """Resolve to the Chunk the quote came from (a split clause has several
+        sharing one clause id). Gate 3 passed, so a match exists; fall back defensively."""
         parts = [h for h in hits if h.clause_id == clause_id]
         needle = normalise_quote(quote)
         source = next((h for h in parts if needle in normalise_quote(h.text)), parts[0])

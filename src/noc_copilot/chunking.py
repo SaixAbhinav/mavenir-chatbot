@@ -1,9 +1,5 @@
-"""Turn Leaf Clauses into Chunks.
-
-A Chunk is one Leaf Clause's body prefixed with its Breadcrumb. The Breadcrumb
-carries structural context into a Chunk that may not contain its parents'
-terminology, and is itself retrievable text.
-"""
+"""Turn Leaf Clauses into Chunks — a clause body prefixed with its breadcrumb,
+which carries structural context and is itself retrievable text."""
 from __future__ import annotations
 
 from collections import Counter
@@ -42,12 +38,8 @@ def _breadcrumb(clause: Clause, spec: SpecEntry) -> str:
 
 
 def _split_body(body: str, budget: int) -> list[str]:
-    """Split on paragraph boundaries, never mid-paragraph.
-
-    A single paragraph longer than the budget is emitted whole rather than cut:
-    an over-long Chunk still carries an intact, quotable clause body, whereas a
-    mid-sentence cut would break Supporting Quote matching.
-    """
+    """Split on paragraph boundaries, never mid-paragraph — a mid-sentence cut
+    would break supporting-quote matching. An over-long paragraph is emitted whole."""
     parts: list[str] = []
     current: list[str] = []
     size = 0
@@ -66,10 +58,8 @@ def build_chunks(
     clauses: list[Clause], spec: SpecEntry, release: str, max_chars: int
 ) -> list[Chunk]:
     chunks: list[Chunk] = []
-    # A clause id is not unique in practice: TS 28.552 v17.17.0 numbers two
-    # different measurements 5.7.2.3. Colliding chunk ids would silently
-    # overwrite one another at index time, so repeats are suffixed in document
-    # order — stable because the corpus versions are pinned.
+    # Clause ids repeat in practice (TS 28.552 numbers two measurements 5.7.2.3),
+    # so colliding ids are suffixed in document order (stable: versions are pinned).
     seen: Counter[str] = Counter()
     for clause in clauses:
         breadcrumb = _breadcrumb(clause, spec)

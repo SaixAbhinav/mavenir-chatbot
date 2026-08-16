@@ -29,9 +29,8 @@ class Settings(BaseModel):
     groq_model: str | None = None
     top_k: int
     max_chunk_chars: int
-    # Retrieval shaping, tuned on the evaluation set. per_spec_cap keeps one
-    # specification from filling the whole context; sibling expansion completes
-    # a procedure that leaf-clause chunking split across sibling clauses.
+    # Retrieval shaping, tuned on the evaluation set: per_spec_cap limits any one
+    # spec; sibling expansion rejoins a procedure split across sibling clauses.
     per_spec_cap: int = 4
     sibling_expand_from: int = 1
     sibling_cap: int = 4

@@ -1,10 +1,6 @@
-"""Parse a 3GPP .docx into Leaf Clauses.
-
-A Leaf Clause is a numbered Clause carrying body text and no numbered
-children. A Clause with both body and children contributes its own body as a
-Leaf Clause; its children are separate Leaf Clauses. Leaf-only chunking means
-no Chunk duplicates another's text, so every Citation is unambiguous.
-"""
+"""Parse a 3GPP .docx into Leaf Clauses — numbered clauses with body text and no
+numbered children. A clause with both body and children yields its own body as a
+leaf plus its children as separate leaves, so no Chunk duplicates another."""
 from __future__ import annotations
 
 import re
@@ -15,20 +11,13 @@ import docx
 from docx.table import Table
 from docx.text.paragraph import Paragraph
 
-# "5.3.5.3<tab>Reception of an RRCReconfiguration by the UE" (numbered clause)
-# "5.1.1a<tab>Initialization of variables" (3GPP inserts a clause between two
-# existing ones by suffixing a letter, so every dot-part may carry one)
-# "A.3.1.1<tab>ASN.1 clauses" (annex clause: single leading letter followed by
-# at least one dot-numeric part; a bare "A" is not a clause id on its own — it
-# would false-positive-match ordinary headings like "A Note on Timer Handling",
-# so annex containers are recognised by their banner instead, below)
+
 _HEADING = re.compile(
     r"^([A-Z](?:\.\d+[a-z]?)+|\d+[a-z]?(?:\.\d+[a-z]?)*)[\t ]+(.+?)\s*$"
 )
 
-# "Annex G (informative):<newline>Change history" — the container heading for an
-# annex. Its clause id is the letter. Recognised by the literal word rather than
-# by shape, which is what keeps a bare "A" from matching ordinary prose.
+# Annex container heading, e.g. "Annex G (informative): Change history"; clause id
+# is the letter. Matched by the literal word so a bare "A" in prose doesn't match.
 _ANNEX_BANNER = re.compile(
     r"^Annex[\t ]+([A-Z])\b[\t ]*(?:\([^)]*\))?[\t ]*:?\s*(.*)$", re.DOTALL
 )
@@ -99,7 +88,7 @@ def parse_leaf_clauses(docx_path: Path) -> list[Clause]:
             return
         current.body = "\n\n".join(part for part in body if part).strip()
         if current.body:
-            collected.append(current)   # ancestors were set when the Clause was created
+            collected.append(current)
         current, body = None, []
 
     for block in _iter_blocks(document):
@@ -115,18 +104,15 @@ def parse_leaf_clauses(docx_path: Path) -> list[Clause]:
         if _is_heading(block):
             match = _match_heading(text)
             if match is None:
-                # Foreword, unnumbered sub-headings. Front matter before the
-                # first real clause (current is None) stays out; once a clause
-                # is open, stay a faithful reader and fold the text into its
-                # body rather than discarding it.
+                # Unnumbered heading: drop it before the first clause, fold it
+                # into the open clause's body once one is open.
                 if current is not None:
                     body.append(text)
                 continue
             clause_id, title = match
             close_current()
-            # Keep only headings that are genuine ancestors of this clause id.
-            # Prefix matching rather than depth arithmetic, because 3GPP
-            # documents sometimes skip a level (5 straight to 5.3.5).
+            # Keep only genuine ancestors (prefix match, not depth arithmetic —
+            # 3GPP docs sometimes skip a level, e.g. 5 → 5.3.5).
             stack = [c for c in stack if clause_id.startswith(c.clause_id + ".")]
             current = Clause(
                 clause_id=clause_id,

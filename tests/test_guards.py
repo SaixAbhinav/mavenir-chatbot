@@ -114,9 +114,9 @@ def test_gate3_searches_every_chunk_of_a_split_clause():
 
 
 def test_gate3_rejects_the_real_spliced_quote_that_a_model_produced():
-    """Regression from findings §4.23. gemini-2.5-flash welded the opening of
-    one bullet of TS 38.331 §5.3.10.1 to the continuation of another, inventing
-    a sentence that appears nowhere in the specification."""
+    """Regression: gemini-2.5-flash welded the opening of one bullet of TS 38.331
+    §5.3.10.1 to the continuation of another, inventing a sentence that appears
+    nowhere in the specification."""
     clause = ("The UE shall:\n\n1>\tif any DAPS bearer is configured, upon receiving N310 "
               "consecutive \"out-of-sync\" indications for the source SpCell from lower "
               "layers and T304 is running:\n\n2>\tstart timer T310 for the source SpCell.")

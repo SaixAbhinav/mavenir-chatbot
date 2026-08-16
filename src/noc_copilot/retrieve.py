@@ -1,15 +1,8 @@
-"""Hybrid retrieval.
+"""Hybrid retrieval: dense + BM25, fused by RRF for ordering only.
 
-RRF fuses the two rankings for ORDERING. It must never be used for gating:
-RRF consumes ranks, so its top score is identical whether the best hit is a
-perfect match or the least-irrelevant chunk in a corpus containing nothing
-relevant. Gate 1 therefore reads the raw cosine and BM25 scores kept on Hit.
-
-Dense search is exact, not approximate. The corpus is ~2,000 chunks of 384
-dimensions, so a full matrix product costs about a millisecond, and Chroma's
-HNSW index defaults to search_ef=10 — which returned 18 of the true top 50 on
-this corpus and silently dropped exact nearest neighbours. The persisted
-collection is used as storage; the ranking is computed here.
+RRF must never gate — it consumes ranks, so its top score is identical whether
+the best hit is a perfect match or the least-irrelevant chunk; Gate 1 reads the
+raw cosine/BM25 kept on each Hit. Dense search is exact (the corpus is small).
 """
 from __future__ import annotations
 
@@ -47,9 +40,8 @@ class Hit:
     cosine: float
     bm25: float
     rrf: float
-    # True when this Chunk was added by sibling expansion rather than ranked
-    # into the results. Its rrf is 0.0 because it never entered the fusion, so
-    # Gate 1 must read raw scores from the ranked Hits only.
+    # Added by sibling expansion, not ranked in (rrf 0.0); Gate 1 reads ranked
+    # Hits only.
     expanded: bool = False
 
     def citation(self) -> str:
@@ -102,9 +94,8 @@ class Retriever:
         fused = rrf_fuse([dense_ids, sparse_ids])
         ordered = sorted(fused, key=lambda cid: fused[cid], reverse=True)
 
-        # One specification can otherwise fill the whole context — TS 28.552
-        # alone is 733 near-identically worded measurement clauses — which is
-        # what makes cross-specification questions fail.
+        # Cap per specification so one spec (e.g. TS 28.552's 733 near-identical
+        # measurement clauses) cannot fill the whole context.
         cap = per_spec_cap if per_spec_cap is not None else len(self.ids)
         best: list[str] = []
         taken: dict[str, int] = defaultdict(int)
@@ -116,9 +107,8 @@ class Retriever:
             if len(best) == top_k:
                 break
 
-        # Leaf-clause chunking splits a procedure across sibling clauses, so the
-        # neighbours of the strongest hits are added after ranking. They are
-        # marked, never reordered ahead of a ranked Hit, and never duplicated.
+        # Leaf-clause chunking splits procedures across siblings; add neighbours
+        # of the top hits after ranking, marked and never reordered ahead.
         chosen = set(best)
         extra: list[str] = []
         for cid in best[:sibling_expand_from]:
@@ -128,10 +118,8 @@ class Retriever:
                     extra.append(sibling)
         extra = extra[:sibling_cap]
 
-        # Both raw scores are carried on every returned Hit, not just the one
-        # from the ranking that surfaced it. A Hit that reached the top on BM25
-        # alone would otherwise carry cosine 0.0 into Gate 1 and be refused on a
-        # score it never actually earned.
+        # Carry both raw scores on every Hit, so a BM25-only hit does not enter
+        # Gate 1 with cosine 0.0 and get refused on a score it never earned.
         hits = []
         for cid in best + extra:
             index = self._position[cid]

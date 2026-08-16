@@ -73,8 +73,8 @@ def test_latency_is_recorded(pipeline):
 
 def test_retrieval_is_called_with_the_configured_shaping(pipeline):
     """The pipeline must pass per_spec_cap and sibling settings through, or the
-    retriever's plain defaults undo the recall work of Task 9 (findings §4.21).
-    Retriever.search does not read settings.yaml itself."""
+    retriever's plain defaults undo the retrieval shaping. Retriever.search does
+    not read settings.yaml itself."""
     pipeline.retriever.search.return_value = [hit(cosine=0.1, bm25=0.2)]
     pipeline.answer("q")
     _, kwargs = pipeline.retriever.search.call_args

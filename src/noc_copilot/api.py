@@ -1,8 +1,4 @@
-"""FastAPI service.
-
-Rate caps exist because the hosted Space is public and holds the API key.
-Past a cap the API explains itself rather than surfacing a provider error.
-"""
+"""FastAPI service."""
 from __future__ import annotations
 
 import json
@@ -19,7 +15,7 @@ from .pipeline import Pipeline
 load_dotenv()
 REPO = Path(__file__).resolve().parents[2]
 
-app = FastAPI(title="3GPP NOC Copilot")
+app = FastAPI(title="3GPP NOC Chatbot")
 
 
 class ChatRequest(BaseModel):

@@ -49,8 +49,8 @@ def test_refusals_include_a_plausible_live_network_diagnostic():
 
 
 def test_refusal_reasons_are_the_ones_the_domain_model_defines():
-    """CONTEXT.md names four Refusal Reasons. 'unverifiable' is a runtime outcome
-    — a quote that could not be found — so it cannot be expected of a question."""
+    """Of the four refusal reasons, 'unverifiable' is a runtime outcome — a quote
+    that could not be found — so it cannot be expected of a question."""
     allowed = {"no_relevant_clause", "insufficient", "not_answerable_from_standards"}
     for q in load_questions(QUESTIONS):
         if q.expect == "refuse":

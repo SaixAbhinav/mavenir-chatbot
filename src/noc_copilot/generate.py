@@ -1,9 +1,5 @@
-"""Grounded generation with provider failover.
-
-Temperature 0 everywhere: grounded extraction wants determinism and
-reproducible evals require it. evaluate.py passes allow_failover=False so a
-rate limit fails loudly rather than silently blending two models.
-"""
+"""Grounded generation. Temperature 0 everywhere for reproducibility;
+evaluate.py passes allow_failover=False so a rate limit fails loudly."""
 from __future__ import annotations
 
 import json
@@ -16,11 +12,8 @@ from .schemas import Answer
 
 __all__ = ["build_prompt", "generate", "GenerationError"]
 
-# Backoff before retrying the same model. Gemini returns a transient 503 under
-# load often enough to be seen in a handful of calls, and failover cannot cover
-# it: the Groq free tier caps a request at 8,000 tokens against a prompt of
-# roughly 12,200. Retrying one model also keeps a pinned-provider evaluation
-# single-model, which failover would not.
+# Retry the same model on transient errors. Failover can't cover a 503 (Groq's
+# 8k-token cap rejects the ~12k prompt) and would break single-model evals.
 RETRY_DELAYS = (2.0, 5.0)
 _TRANSIENT = ("503", "429", "unavailable", "overloaded", "high demand",
               "rate limit", "timeout", "deadline")
@@ -57,13 +50,8 @@ def _gemini(prompt: str, model: str) -> Answer:
 
 
 def _strict_schema() -> dict:
-    """Answer's JSON Schema in the shape strict structured output demands.
-
-    Groq rejects the schema Pydantic emits: `additionalProperties: false` must
-    be set on *every* object, including the nested `$defs/Citation` that a
-    list-of-models produces, and every property must be listed as required.
-    Setting it only at the top level fails with a 400.
-    """
+    """Answer's JSON Schema tightened for Groq strict mode: additionalProperties
+    false and every property required on every object, or Groq returns a 400."""
     def tighten(node: object) -> None:
         if isinstance(node, dict):
             if node.get("type") == "object" or "properties" in node:
@@ -117,10 +105,9 @@ def generate(
             try:
                 call = _gemini if name == "gemini" else _groq
                 return call(prompt, model), model
-            except Exception as exc:  # provider errors, rate limits, malformed output
+            except Exception as exc:
                 errors.append(f"{name}: {exc}")
-                # A schema rejection or bad key will fail identically forever;
-                # only overload and rate limiting are worth waiting out.
+                # Transient errors are worth waiting out; a schema/key error is not.
                 if attempt == len(RETRY_DELAYS) or not _is_transient(exc):
                     break
                 _sleep(RETRY_DELAYS[attempt])
