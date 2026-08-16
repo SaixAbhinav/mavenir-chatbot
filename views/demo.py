@@ -1,7 +1,4 @@
-"""Demo page — the grounded-answer chat. No sidebar, no marketing copy.
-
-Explanations live on the Documentation page, reached via the top-right button.
-"""
+"""Demo page — the grounded-answer chat. Explanations live on the Documentation page."""
 from __future__ import annotations
 
 import html
@@ -22,9 +19,8 @@ REASON_LABEL = {
     "unverifiable": "Answer could not be verified against the cited text",
 }
 
-# (short pill label, full question). Verbatim from the frozen evaluation set so
-# each behaves as labelled: one answers with a citation, two decline (one out of
-# corpus, one about a live network). A reviewer clicks and sees the difference.
+# (pill label, full question), verbatim from the frozen eval set: one answers
+# with a citation, two decline — a reviewer clicks and sees the difference.
 SUGGESTIONS = [
     ("RRC re-establishment",
      "What conditions cause the UE to initiate the RRC connection re-establishment procedure?"),
@@ -84,8 +80,7 @@ def _render_response(body: dict) -> None:
             )
             with st.expander("Full clause text"):
                 st.text(citation["text"])
-    # On a refusal the model_id is not reported, so show the gate that fired
-    # rather than claiming no model was called (it may have been, at Gate 2).
+    # On a refusal show the gate that fired; a call may still have happened at Gate 2.
     tail = f"gate: {body['gate']}" if body["refused"] else (body.get("model_id") or "-")
     st.markdown(f'<p class="meta">{body["latency_ms"]} ms · {html.escape(tail)}</p>',
                 unsafe_allow_html=True)
@@ -98,8 +93,7 @@ for entry in st.session_state.history:
         else:
             st.markdown(entry["content"])
 
-# Empty state: lift the input up and pin the pills above it, so the two read as
-# one centred group in the middle of the screen rather than pinned to the floor.
+# Empty state: lift the input and pills to mid-screen so they read as one group.
 if not st.session_state.history:
     st.markdown(
         """
@@ -140,8 +134,7 @@ if question:
         st.session_state.history.append({"role": "assistant", "content":
             "This demo is receiving a lot of requests right now. Please wait a few seconds and try again."})
     elif response.status_code != 200:
-        # The language model is unreachable or rate-limited. Show a clean line,
-        # never the provider's raw error payload.
+        # Model unreachable/rate-limited: show a clean line, not the raw payload.
         st.session_state.history.append({"role": "assistant", "content":
             "The language model is temporarily unavailable (it may be rate-limited). Please try again in a moment."})
     else:

@@ -1,29 +1,20 @@
-# Evaluation set for the 3GPP NOC Copilot.
-#
-# FROZEN 2026-08-14, BEFORE any retrieval tuning. Verify via git history: this
-# file's first commit precedes every commit touching retrieve.py or the
-# thresholds in config/settings.yaml.
-#
-# How these were authored (design spec §4.7, findings §1.5):
+# Evaluation set for the 3GPP NOC Chatbot.
+# FROZEN before any retrieval or threshold-tuning code — verify via git history.
+# How these were authored:
 #   - Every question was written first, from what a NOC engineer asks, then the
 #     answering clause was located by reading the pinned specification.
 #   - Gold clause ids were read from the document. None came from system output,
 #     and no retrieval query was run while authoring.
 #   - No question was generated from chunk text: questions written from chunks
 #     inherit their vocabulary and inflate recall toward 1.0.
-#   - Gold ids respect the corpus boundary — ASN.1 sections (ADR 0005) and the
-#     Change history annexes (ADR 0006) are excluded, so nothing cites them.
-#
-# A question may be ADDED after this commit. No question is ever REWRITTEN,
-# especially not one the system fails.
-#
+#   - Gold ids respect the corpus boundary — ASN.1 sections and the Change
+#     history annexes are excluded, so nothing cites them.
 # kind:   single      answerable from one clause
 #         cross       needs clauses from two or more specifications
 #         noc         operations-facing: counters, alarms, measurements
 #         paraphrase  operator vocabulary, deliberately not the spec's wording
 # reason: no_relevant_clause | insufficient | not_answerable_from_standards
-#         (CONTEXT.md's fourth reason, `unverifiable`, is a runtime outcome and
-#          cannot be expected of a question)
+#         (the fourth reason, `unverifiable`, is a runtime outcome, not a label)
 
 questions:
 
@@ -135,7 +126,7 @@ questions:
     kind: single
     expect: answer
     # Authored as a refusal, then corrected: the default MAC cell group
-    # configuration table really does carry this value. See findings §4.16.
+    # configuration table really does carry this value.
     question: "In the default MAC cell group configuration, what value is periodicBSR-Timer set to?"
     gold: ["38.331#9.2.2"]
 
@@ -268,8 +259,8 @@ questions:
   - id: r003
     expect: refuse
     reason: no_relevant_clause
-    # ASN.1 information elements are excluded from the corpus (ADR 0005). This
-    # question proves the exclusion produces a refusal rather than a guess.
+    # ASN.1 information elements are excluded from the corpus; this proves the
+    # exclusion produces a refusal rather than a guess.
     question: "What fields does the RRCReconfiguration message contain?"
 
   - id: r004
@@ -298,7 +289,7 @@ questions:
     expect: refuse
     reason: insufficient
     # The re-establishment procedure clauses are on-topic and will retrieve;
-    # the message definition itself is ASN.1 and excluded (ADR 0005).
+    # the message definition itself is ASN.1 and excluded.
     question: "What is the ASN.1 definition of the RRCReestablishmentRequest message?"
 
   - id: r010

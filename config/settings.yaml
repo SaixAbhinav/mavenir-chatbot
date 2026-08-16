@@ -1,13 +1,11 @@
 embedding_model: "BAAI/bge-small-en-v1.5"
-gemini_model: "gemini-3.7-flash"   # chosen in Task 10 by measuring verbatim-quote
-                                   # adherence on a real grounded call, not from memory.
+gemini_model: "gemini-3.7-flash"   # chosen by measuring verbatim-quote adherence;
                                    # gemini-2.5-flash spliced two bullets into one quote.
-groq_model: "openai/gpt-oss-120b"  # only Groq family accepting strict json_schema.
-                                   # Blocked at runtime by an 8,000 TPM free-tier cap
-                                   # against a ~12,200-token prompt - see findings 4.25.
+groq_model: "openai/gpt-oss-120b"  # only Groq family accepting strict json_schema;
+                                   # blocked at runtime by an 8,000 TPM free-tier cap.
 top_k: 8
 max_chunk_chars: 6000
-per_spec_cap: 4         # max ranked chunks from one spec; measured in findings 4.20
+per_spec_cap: 4         # max ranked chunks from one spec
 sibling_expand_from: 1  # expand siblings of this many top-ranked hits
 sibling_cap: 4          # max sibling chunks appended after ranking
 cosine_threshold: 0.79  # fitted on the frozen eval set (scripts/calibrate.py):

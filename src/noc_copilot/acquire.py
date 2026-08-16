@@ -1,9 +1,5 @@
-"""Download 3GPP archives and normalise their payload to .docx.
-
-python-docx reads only OOXML .docx. 3GPP archives contain either .doc or
-.docx depending on the Specification, so everything is normalised through
-headless LibreOffice before parsing.
-"""
+"""Download 3GPP archives and normalise their payload to .docx via headless
+LibreOffice (python-docx reads only OOXML; 3GPP ships .doc or .docx)."""
 from __future__ import annotations
 
 import os
@@ -53,10 +49,8 @@ def extract_document(zip_path: Path, dest: Path) -> Path:
         if len(names) == 1:
             name = names[0]
         else:
-            # Multiple Word payloads: disambiguate by preferring the one whose
-            # stem matches the archive's own stem (e.g. 38331-hh0.zip ->
-            # 38331-hh0.docx). A cover sheet or change-history file alongside
-            # the real document must never be silently picked.
+            # Multiple Word payloads: pick the one whose stem matches the archive
+            # stem, so a cover sheet or change-history file is never picked.
             archive_stem = zip_path.stem.lower()
             matches = [n for n in names if Path(n).stem.lower() == archive_stem]
             if len(matches) != 1:
@@ -100,8 +94,7 @@ def normalise_to_docx(path: Path, dest: Path) -> Path:
         timeout=600,
         check=False,
     )
-    # Success is judged by the output file, not by stderr: headless LibreOffice
-    # emits a benign "Could not find platform independent libraries" warning.
+    # Judge success by the output file: LibreOffice emits a benign stderr warning.
     if not expected.exists():
         raise RuntimeError(f"LibreOffice did not produce {expected}")
     return expected
