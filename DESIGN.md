@@ -73,9 +73,11 @@ Key choices:
 ## 4. Turning clauses into searchable text
 
 Each searchable piece is the clause text with a short header on top. The header is
-the full path to the clause, for example
-`TS 38.331 v17.17.0 > 5.3 > 5.3.10 > 5.3.10.3`. This header is searched too, so a
-question can match on context even when the clause body is very short.
+the full path to the clause, including the number and title at each level, for
+example
+`TS 38.331 v17.17.0 § 5 Procedures > 5.3 Connection control > 5.3.13 RRC connection resume > 5.3.13.6 ...`.
+This header is searched too, so a question can match on context even when the
+clause body is very short.
 
 Two details matter:
 
@@ -111,7 +113,7 @@ More choices:
 - If a procedure is split across neighbouring clauses, the neighbours are added
   back in afterward, so the model sees the full picture. These added clauses are
   marked and kept out of the relevance check. The final context is about 11
-  clauses.
+  clauses: 8 top-ranked, plus up to 4 siblings, so at most 12.
 
 ## 6. Stopping made-up answers
 
@@ -146,9 +148,10 @@ refusals are not retried, because a re-ask would not change them.
 - Gemini (`gemini-3.7-flash`) writes the answers. It was picked by testing which
   model copies quotes most faithfully. An earlier model merged two bullet points
   into one quote and failed Gate 3.
-- Groq (`gpt-oss-120b`) is used only as the grader during evaluation, not as a
-  backup writer. Its free-tier limit is too small for the long retrieval prompt,
-  so generation stays on one model on purpose.
+- Groq (`gpt-oss-120b`) is wired in as a backup writer, but its free-tier limit
+  is too small for the long retrieval prompt, so in practice every answer comes
+  from Gemini. Groq's real job is the grader during evaluation, where the backup
+  is turned off so a failure is loud instead of silently switching models.
 - Temporary errors (like a busy server) are retried with a short wait. A real
   error, like a bad key, is not retried, because it is a bug and will not fix
   itself.
@@ -198,11 +201,12 @@ Stated plainly:
   "grounded" means the quote exists in the cited clause, which is a strong and
   cheap check. Whether the quote truly proves the answer is checked separately by
   the grader, not live.
-- Retrieval finds the right clause 83% of the time, and questions spanning two
-  specs are the weak spot (3 of 5). A miss becomes a refusal, which is safe, but
-  it limits how often the system can help.
+- Retrieval finds the right clause 83% of the time. Questions spanning two specs
+  are a weak spot (3 of 5 retrieved), which is expected since the answer lives in
+  two documents at once. A miss becomes a refusal, which is safe, but it limits
+  how often the system can help.
 - Gate 2 is the only check that runs inside the model. It is backed up by Gate 3,
-  which does not.
+  which runs outside it.
 
 ## 10. Tech stack
 
