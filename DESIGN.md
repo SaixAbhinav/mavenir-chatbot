@@ -1,211 +1,213 @@
 # Design: 3GPP NOC Chatbot
 
-This document describes what was built and why each decision was made. For setup
-and how to run it, see [`README.md`](README.md).
+This document explains what was built and why. For setup and how to run it, see
+[`README.md`](README.md).
 
-## 1. Problem and design goal
+## 1. The problem
 
-A network-operations engineer needs to ask precise questions about the 5G NR
-radio stack, fault supervision, and performance measurements, and get an answer
-they can trust and cite. A general chatbot hallucinates on this task: it answers
-confidently whether or not it knows, and a wrong answer about a standard is worse
-than no answer, because the reader cannot tell it is wrong.
+A network-operations engineer needs precise answers about 5G standards, and needs
+to cite the source. A normal chatbot fails here in one specific way: it makes
+things up. It answers with confidence even when it does not know. For a standard,
+a wrong answer is worse than no answer, because the reader cannot tell it is
+wrong.
 
-The design goal follows from that. Make a confident wrong answer structurally
-hard to produce, not just unlikely. The system answers only from the corpus,
-cites the exact clause, and refuses when grounding cannot be established. A
-refusal is a correct outcome, not a failure.
+So the goal is simple. The system should only answer from the official documents,
+show the exact clause it used, and say "I don't know" when the documents do not
+cover the question. Saying "I don't know" is treated as a correct answer, not a
+failure.
 
-## 2. Architecture
+## 2. How it works, end to end
 
-The pipeline is explicit. There is no LangChain, LlamaIndex, or agent framework,
-so every step is inspectable and every failure mode is handled in code.
+The flow is written out step by step. There is no LangChain, LlamaIndex, or agent
+framework. Every step is plain code, so it is easy to read and easy to debug.
 
 ```
 question
-  -> Retrieve      hybrid dense + BM25, fused by RRF, shaped for diversity
-  -> Gate 1        relevance: refuse on raw scores, before any model call
-  -> Generate      Gemini, temperature 0, structured JSON (Pydantic schema)
-  -> Gate 2        sufficiency: model declares context adequate and in scope
-  -> Gate 3        verifiability: every quote must appear verbatim, checked in code
-  -> answer + citations, or a refusal with one of four reasons
+  -> Retrieve      find the most relevant clauses (two search methods, combined)
+  -> Gate 1        if nothing relevant was found, refuse now (no AI call yet)
+  -> Generate      ask Gemini for an answer in a fixed JSON format
+  -> Gate 2        the model says whether the clauses actually cover the question
+  -> Gate 3        check, in code, that each quote really appears in the clause
+  -> return the answer with citations, or a refusal with a reason
 ```
 
-A FastAPI service (`/chat`, `/health`) holds all logic. A thin Streamlit client
-renders it. No logic lives in the UI, so the pipeline is testable without a
-browser.
+A FastAPI service does all the work. A small Streamlit page shows the result. The
+page has no logic of its own, so the system can be tested without a browser.
 
-Module layout (`src/noc_copilot/`):
+The code is split into small modules:
 
-| Module | Responsibility |
-|--------|----------------|
-| `acquire.py`, `versions.py` | download specs from the 3GPP archive, pin versions |
-| `clauses.py` | parse a `.docx` into leaf clauses with body and ancestry |
-| `chunking.py` | one leaf clause plus breadcrumb becomes one chunk |
-| `store.py` | embed and persist the ChromaDB collection |
-| `retrieve.py` | hybrid retrieval, RRF fusion, per-spec cap, sibling expansion |
-| `guards.py` | the three deterministic gates |
-| `generate.py` | grounded generation with retry and failover |
-| `pipeline.py` | wires retrieve, gates, and generate together |
-| `api.py` | FastAPI service |
+| Module | What it does |
+|--------|--------------|
+| `acquire.py`, `versions.py` | download the specs from 3GPP and lock their versions |
+| `clauses.py` | read a `.docx` file and split it into individual clauses |
+| `chunking.py` | turn each clause into one searchable piece of text |
+| `store.py` | create the embeddings and save the search database |
+| `retrieve.py` | run the search, combine the two methods, and shape the results |
+| `guards.py` | the three safety checks (the gates) |
+| `generate.py` | call the model and handle retries |
+| `pipeline.py` | connect search, gates, and generation into one flow |
+| `api.py` | the web service |
 
-## 3. Corpus and ingestion
+## 3. The documents
 
-Seven specifications, all pinned to Release 17 so a cross-specification answer
-describes one coherent version of the system: TS 38.300 (NR overall), 38.321
-(MAC), 38.322 (RLC), 38.323 (PDCP), 38.331 (RRC), 28.545 (fault supervision),
-28.552 (performance measurements). Indexed into 2,085 chunks.
+The system uses seven 3GPP specifications. All are locked to Release 17, so
+answers that combine several specs describe the same version of the system. The
+specs are: TS 38.300 (overview), 38.321 (MAC), 38.322 (RLC), 38.323 (PDCP),
+38.331 (RRC), 28.545 (fault supervision), and 28.552 (performance measurements).
+Together they become 2,085 searchable pieces.
 
-Decisions:
+Key choices:
 
-- Parse by leaf clause, not by fixed-size windows. A 3GPP clause is the natural
-  unit of meaning and of citation. The parser walks the `.docx` structure and
-  emits each numbered leaf clause with its ancestry, so a chunk maps to exactly
-  one clause id that can be cited back to the reader.
-- Exclude ASN.1 information-element sections. They are large, near-duplicate, and
-  break the one-chunk-one-identity property. Change-history annexes are excluded
-  because they are editorial metadata, and ingestion asserts none leaked rather
-  than trusting the exclusion list. Other annexes are kept.
-- Keep exclusion scope in configuration, not the parser (`config/specs.yaml`).
-  Matching is on whole clause-id parts, so excluding `6` drops `6.3.2` but leaves
-  `60.1` alone.
-- Do not commit the built index. It contains copyrighted 3GPP clause text, so
-  `data/` is git-ignored and regenerated locally by the ingest pipeline.
-  Retrieved text is only ever shown as short, cited quotations.
+- Split the documents by clause, not by fixed length. A clause is the natural unit
+  in a spec, and it is what you cite. Each piece maps to exactly one clause, so it
+  can always be cited back to the reader.
+- Leave out the ASN.1 code sections. They are huge, nearly identical to each
+  other, and would flood the search with noise. The change-history sections are
+  also removed, because they are just edit logs. The code even checks that these
+  never slip in by accident.
+- Keep the list of what to include or exclude in a config file, not buried in the
+  parser. This makes the corpus easy to adjust.
+- Do not store the search database in the repo. It contains copyrighted 3GPP text,
+  so it is rebuilt locally instead. Answers only ever show short, quoted snippets.
 
-## 4. Chunking
+## 4. Turning clauses into searchable text
 
-Each chunk is a clause body prefixed with its breadcrumb, the full
-`TS 38.331 v17.17.0 § 5.3 > 5.3.10 > 5.3.10.3` trail. The breadcrumb is itself
-retrievable text, so structural context helps a query match even when the clause
-body is terse.
+Each searchable piece is the clause text with a short header on top. The header is
+the full path to the clause, for example
+`TS 38.331 v17.17.0 > 5.3 > 5.3.10 > 5.3.10.3`. This header is searched too, so a
+question can match on context even when the clause body is very short.
 
-- Split only on paragraph boundaries, never mid-sentence. A mid-sentence cut
-  would break the verbatim-quote check in Gate 3, which is the basis of the
-  anti-hallucination guarantee. An over-long paragraph is emitted whole.
-- Suffix colliding clause ids in document order. Real specs reuse ids (TS 28.552
-  numbers two measurements `5.7.2.3`). Pinned versions make document order
-  stable, so the suffixing is deterministic.
+Two details matter:
 
-## 5. Retrieval
+- Never cut a clause in the middle of a sentence. A mid-sentence cut would break
+  the quote check in Gate 3, which is the heart of the whole system. If a
+  paragraph is too long, it is kept whole instead of being split badly.
+- Some clauses reuse the same number. When that happens, they are numbered in
+  order so each piece stays unique. Because the versions are locked, this ordering
+  is always the same.
 
-Two searches, fused, then shaped.
+## 5. Search
 
-- Hybrid dense plus BM25. Dense (BGE-small, cosine) catches paraphrases. BM25
-  catches the exact identifiers an engineer types, such as timer names, counters,
-  and `periodicBSR-Timer`. Neither alone is enough.
-- Exact dense search, not approximate nearest neighbour. The corpus is about 2k
-  chunks, so a brute-force dot product over normalised embeddings is fast and
-  gives exact recall, with no approximate-index recall loss. ChromaDB is used for
-  persistence and metadata.
-- RRF fuses for ordering only. It never gates. Reciprocal Rank Fusion consumes
-  ranks, so its top score is identical whether the best hit is a perfect match or
-  the least-irrelevant chunk in the corpus. Using it as a relevance signal would
-  be a bug. Each hit therefore carries its raw cosine and BM25 scores, and Gate 1
-  thresholds those instead.
-- Per-spec cap. One specification (TS 28.552 has hundreds of near-identical
-  measurement clauses) must not fill the whole context, so at most N ranked
-  chunks per spec are kept. This preserves cross-specification coverage.
-- Sibling expansion. Leaf-clause chunking can split a procedure across sibling
-  clauses. After ranking, neighbours of the top hits are appended, marked as
-  expanded, never reordered ahead of ranked hits, and never fed to Gate 1. A
-  split procedure is reassembled without polluting the relevance signal. The
-  result is about 11 chunks of context.
+The search uses two methods and combines them.
 
-## 6. Preventing hallucination
+- Meaning-based search (embeddings) catches paraphrases and questions worded
+  differently from the spec.
+- Keyword search (BM25) catches exact terms an engineer types, like a timer name
+  or a counter such as `periodicBSR-Timer`.
+- Neither method alone is enough, so both run and their results are merged.
 
-Each way a hallucination could arise is closed by a distinct mechanism. Three
-deterministic gates sit outside the language model, so none of them can be
-talked out of a refusal.
+More choices:
 
-| How a hallucination would arise | What blocks it |
-|---------------------------------|----------------|
-| Answering from the model's own training knowledge | The prompt supplies only the retrieved clauses and forbids outside knowledge. Generation runs at temperature 0. |
-| Answering when nothing on-topic was retrieved | Gate 1 (relevance) refuses on raw cosine and BM25 scores, before any model call. Cheap and model-independent. |
-| Padding a thin or off-target context into a confident answer | Gate 2 (sufficiency) requires the model to declare the context sufficient, and to flag live-network questions the standards cannot answer. |
-| Inventing a clause id, or paraphrasing or fabricating a quote | Gate 3 (verifiability) checks in code that every supporting quote appears verbatim, normalised for whitespace and case, in the clause it cites. A fabricated or altered citation is rejected and withheld, not shown. |
-| A quote that is real but does not support the answer | Offline evaluation judges groundedness with a different model than the generator, so the check is independent of what it grades. |
+- The corpus is small (about 2,000 pieces), so the meaning-based search compares
+  against everything directly. This is fast and finds the true best matches, with
+  no accuracy lost to shortcuts.
+- The method that merges the two result lists (RRF) is used only to decide the
+  order. It is never used to decide whether something is relevant, because it
+  loses that information. The relevance check uses the original raw scores
+  instead.
+- No single spec is allowed to dominate the results. One spec (TS 28.552) has
+  hundreds of near-identical clauses, so a limit per spec keeps the other specs in
+  view.
+- If a procedure is split across neighbouring clauses, the neighbours are added
+  back in afterward, so the model sees the full picture. These added clauses are
+  marked and kept out of the relevance check. The final context is about 11
+  clauses.
 
-The four refusal reasons are reported separately, because they mean different
-things to a NOC reader: no relevant clause, insufficient, not answerable from the
-standards (a live-network question), and unverifiable.
+## 6. Stopping made-up answers
 
-Structured output. The model must return a Pydantic-typed object (`answer`,
-`sufficient`, `answerable_from_standards`, `citations[]`), enforced by the
-provider's JSON-schema mode. This makes Gates 2 and 3 mechanical rather than a
-matter of parsing prose.
+This is the core of the design. For every way the model could make something up,
+there is one specific check that stops it. The three checks (the gates) run
+outside the model, so the model cannot argue its way past them.
 
-One bounded retry. A verbatim-quote failure triggers exactly one re-prompt to
-copy the quote character-for-character before refusing. Insufficient and
-live-network verdicts are not retried, because they will not change on a re-ask.
+| How a made-up answer could happen | What stops it |
+|-----------------------------------|---------------|
+| The model answers from its own training instead of the documents | The prompt gives it only the retrieved clauses and tells it to ignore outside knowledge. It also runs at temperature 0, so output is stable. |
+| The model answers when nothing relevant was found | Gate 1 refuses based on the raw search scores, before the model is even called. This is fast and does not depend on the model. |
+| The model stretches weak clauses into a confident answer | Gate 2 makes the model state whether the clauses really cover the question, and flag questions that are about a live network rather than the standards. |
+| The model invents a clause number or reworders a quote | Gate 3 checks, in code, that every quote appears word-for-word in the clause it points to. If it does not, the answer is thrown away, not shown. |
+| The quote is real but does not actually support the answer | During evaluation, a different model checks whether the answer follows from the quote, so the check is independent of the model being graded. |
+
+When the system refuses, it says why, using one of four reasons: nothing relevant
+was found, the clauses do not have the detail, the question is about a live
+network, or the answer could not be verified. These mean different things to an
+engineer, so they are kept separate.
+
+The model must reply in a fixed JSON format (answer, whether it is sufficient,
+whether it is answerable from the standards, and the citations). This is what
+makes Gates 2 and 3 simple, mechanical checks instead of guesswork.
+
+If a quote fails the word-for-word check, the model gets exactly one more try,
+with a reminder to copy the quote exactly. After that it refuses. The other
+refusals are not retried, because a re-ask would not change them.
 
 ## 7. Generation
 
-- Temperature 0 everywhere, for reproducibility.
-- Gemini (`gemini-3.7-flash`) is the generator, chosen by measuring
-  verbatim-quote adherence. An earlier model spliced two bullet points into one
-  quote and failed Gate 3.
-- Groq (`gpt-oss-120b`) is the evaluation judge, not a generation failover. Its
-  free-tier token cap rejects the roughly 12k-token retrieval prompt, so
-  generation is single-model by design. Failover is disabled in evaluation so a
-  rate limit fails loudly rather than silently blending two models.
-- Transient errors (503, 429) are retried with backoff. A schema or key error is
-  not retried, because it is a bug, not a blip.
+- Temperature 0 everywhere, so the same question gives the same answer.
+- Gemini (`gemini-3.7-flash`) writes the answers. It was picked by testing which
+  model copies quotes most faithfully. An earlier model merged two bullet points
+  into one quote and failed Gate 3.
+- Groq (`gpt-oss-120b`) is used only as the grader during evaluation, not as a
+  backup writer. Its free-tier limit is too small for the long retrieval prompt,
+  so generation stays on one model on purpose.
+- Temporary errors (like a busy server) are retried with a short wait. A real
+  error, like a bad key, is not retried, because it is a bug and will not fix
+  itself.
 
-## 8. Evaluation methodology
+## 8. How it was evaluated
 
-The evaluation set is the submission's evidence, so it is guarded against a
-circular result.
+The test set is the proof, so it is protected from cheating.
 
-- Frozen before any retrieval code existed, which is verifiable in git history,
-  so questions could not be shaped to fit the retriever. Questions may be added
-  later, but never rewritten, least of all one the system fails.
-- Authored by reading the specifications, not the chunks. Questions written from
-  chunk text inherit its vocabulary and inflate retrieval toward 1.0. Gold clause
-  ids were read from the documents, never taken from system output.
-- 50 questions: 36 answerable, 14 out-of-scope.
-- The groundedness judge is a different model than the generator, because a model
-  grading its own output is biased toward it.
+- The questions were frozen before the search code was written, which git history
+  shows. This means the questions could not be tuned to match the search. New
+  questions can be added later, but existing ones are never rewritten, especially
+  not one the system got wrong.
+- The questions were written by reading the specs, not by reading the search
+  pieces. Writing from the pieces would copy their exact words and make the search
+  look better than it is. The correct clause for each question was read from the
+  document by hand.
+- There are 50 questions: 36 that should be answered, 14 that should be refused.
+- The grader is a different model from the writer, because a model grading its own
+  work tends to favour it.
 
-Results (`gemini-3.7-flash`, judged by `gpt-oss-120b`), committed per-question in
-[`eval/results/gemini.sanitized.json`](eval/results/gemini.sanitized.json):
+Results (`gemini-3.7-flash`, graded by `gpt-oss-120b`), saved question by question
+in [`eval/results/gemini.sanitized.json`](eval/results/gemini.sanitized.json):
 
 | Metric | Result |
 |--------|--------|
-| Groundedness: judged answers supported by their cited clauses | 33 / 33 (1.00) |
-| Out-of-scope refusal: out-of-scope questions correctly declined | 14 / 14 (1.00) |
-| Full-gold retrieval recall | 30 / 36 (0.83) |
-| False-refusal rate: answerable questions wrongly declined | 3 / 36 (0.08) |
+| Answers that were actually supported by their cited clause | 33 / 33 (1.00) |
+| Out-of-scope questions correctly refused | 14 / 14 (1.00) |
+| Questions where the correct clause was retrieved | 30 / 36 (0.83) |
+| Answerable questions wrongly refused | 3 / 36 (0.08) |
 
-Every answer produced was grounded in the clause it cited, and every out-of-scope
-question was refused. Gate 3 never had to fire at runtime, meaning no generated
-answer reached the user with a quote that failed the verbatim check. The three
-false refusals are the safe error direction: the system withholds rather than
-risk an unsupported answer.
+Every answer the system gave was backed by its cited clause, and every
+out-of-scope question was refused. Gate 3 never had to reject anything at run
+time, meaning no bad quote ever reached it. The three wrong refusals fail in the
+safe direction: the system holds back instead of guessing.
 
-## 9. Trade-offs and known limitations
+## 9. Trade-offs and limits
 
-- Gate 1 thresholds are calibrated on the same 50-question set they are reported
-  on. With n=50 a held-out split was not statistically meaningful, so
-  transparency was chosen over a false hold-out. The generation and groundedness
-  metrics are not fit to the threshold. The refusal calibration is in-sample.
-- The evaluation set is small. 33/33 and 14/14 are perfect but over small n. The
-  claim is that every answer in a frozen, spec-authored sample was grounded, not
-  a generalisation guarantee.
-- Gate 3 verifies that a quote is real, not that it entails the answer. At
-  runtime, grounded means the cited quote exists verbatim in the cited clause,
-  which is a strong and cheap necessary condition. True entailment is checked
-  offline by the independent groundedness judge, not in the live path.
-- Recall is 0.83, and cross-specification is the weak spot (3/5). A missed clause
-  becomes a refusal, which is the safe direction, but it caps usefulness.
-- Gate 2 is the one gate inside the model, using its self-reported `sufficient`
-  and `answerable_from_standards` booleans, backstopped by the deterministic
-  Gate 3.
+Stated plainly:
+
+- The Gate 1 thresholds were tuned on the same 50 questions they are reported on.
+  With only 50 questions, a separate test split would not have been meaningful, so
+  honesty was chosen over a fake one. The answer-quality numbers are not affected
+  by this tuning; only the refusal thresholds are.
+- The test set is small. 33/33 and 14/14 look perfect, but on a small set that is
+  not a guarantee it will always hold. The claim is only about this frozen set.
+- Gate 3 confirms a quote is real, not that it proves the answer. At run time,
+  "grounded" means the quote exists in the cited clause, which is a strong and
+  cheap check. Whether the quote truly proves the answer is checked separately by
+  the grader, not live.
+- Retrieval finds the right clause 83% of the time, and questions spanning two
+  specs are the weak spot (3 of 5). A miss becomes a refusal, which is safe, but
+  it limits how often the system can help.
+- Gate 2 is the only check that runs inside the model. It is backed up by Gate 3,
+  which does not.
 
 ## 10. Tech stack
 
-Python 3.11, ChromaDB (vector store), rank-bm25, sentence-transformers (BGE-small
-embeddings), Google Gemini (generation), Groq (groundedness judge), FastAPI
-(service), Streamlit (client), Pydantic (the model contract), and uv (packaging).
-No orchestration framework. The pipeline is explicit by choice, so its behaviour
-is fully owned in about 1,300 lines of tested code.
+Python 3.11, ChromaDB (search database), rank-bm25 (keyword search),
+sentence-transformers (embeddings), Google Gemini (writing answers), Groq
+(grading), FastAPI (web service), Streamlit (interface), Pydantic (the response
+format), and uv (packaging). No orchestration framework. The flow is written by
+hand, so all of its behaviour lives in about 1,300 lines of tested code.
